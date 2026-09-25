@@ -1,0 +1,47 @@
+service_id,vehicle_id,dealer_id,visit_date,issue,cost
+SRV-50001,VH-10044,DLR-002,2026-08-26,Oxygen sensor replacement following check engine indicator,298.04
+SRV-50002,VH-10012,DLR-002,2026-08-27,Coolant leak repair and water pump replacement,733.46
+SRV-50003,VH-10036,DLR-001,2026-08-27,Coolant leak repair and water pump replacement,720.23
+SRV-50004,VH-10033,DLR-001,2026-08-28,Oxygen sensor replacement following check engine indicator,295.92
+SRV-50005,VH-10002,DLR-003,2026-08-29,Battery replacement and alternator circuit test,331.03
+SRV-50006,VH-10029,DLR-003,2026-08-30,Front brake rotor and pad replacement,526.03
+SRV-50007,VH-10002,DLR-003,2026-08-30,Alternator replacement due to charging failure,790.01
+SRV-50008,VH-10005,DLR-002,2026-08-31,Alternator replacement due to charging failure,818.6
+SRV-50009,VH-10027,DLR-004,2026-08-31,Alternator replacement due to charging failure,776.41
+SRV-50010,VH-10044,DLR-002,2026-09-01,Coolant leak repair and water pump replacement,708.24
+SRV-50011,VH-10047,DLR-003,2026-09-01,Oxygen sensor replacement following check engine indicator,304.87
+SRV-50012,VH-10008,DLR-002,2026-09-02,Coolant leak repair and water pump replacement,765.51
+SRV-50013,VH-10040,DLR-003,2026-09-03,Coolant leak repair and water pump replacement,737.76
+SRV-50014,VH-10047,DLR-003,2026-09-04,Coolant leak repair and water pump replacement,762.26
+SRV-50015,VH-10033,DLR-001,2026-09-05,Coolant leak repair and water pump replacement,728.97
+SRV-50016,VH-10007,DLR-005,2026-09-06,Alternator replacement due to charging failure,821.21
+SRV-50017,VH-10018,DLR-001,2026-09-06,Front brake rotor and pad replacement,580.5
+SRV-50018,VH-10006,DLR-005,2026-09-07,Transmission fluid flush and torque converter solenoid repair,5014.94
+SRV-50019,VH-10002,DLR-003,2026-09-08,Alternator replacement due to charging failure,778.62
+SRV-50020,VH-10044,DLR-002,2026-09-08,Transmission fluid flush and torque converter solenoid repair,4822.01
+SRV-50021,VH-10038,DLR-001,2026-09-09,Scheduled routine maintenance and multi-point inspection,165.0
+SRV-50022,VH-10004,DLR-004,2026-09-09,Oxygen sensor replacement following check engine indicator,293.57
+SRV-50023,VH-10014,DLR-003,2026-09-10,Suspension strut assembly replacement,1000.4
+SRV-50024,VH-10002,DLR-003,2026-09-10,Oxygen sensor replacement following check engine indicator,309.87
+SRV-50025,VH-10036,DLR-001,2026-09-11,Suspension strut assembly replacement,960.44
+SRV-50026,VH-10035,DLR-001,2026-09-12,Scheduled routine maintenance and multi-point inspection,165.0
+SRV-50027,VH-10013,DLR-001,2026-09-12,Coolant leak repair and water pump replacement,740.56
+SRV-50028,VH-10012,DLR-002,2026-09-13,Scheduled routine maintenance and multi-point inspection,165.0
+SRV-50029,VH-10026,DLR-002,2026-09-13,Front brake rotor and pad replacement,563.18
+SRV-50030,VH-10046,DLR-002,2026-09-14,Oxygen sensor replacement following check engine indicator,319.12
+SRV-50031,VH-10016,DLR-002,2026-09-15,Transmission fluid flush and torque converter solenoid repair,4956.92
+SRV-50032,VH-10031,DLR-003,2026-09-15,Suspension strut assembly replacement,964.98
+SRV-50033,VH-10036,DLR-001,2026-09-16,Suspension strut assembly replacement,991.03
+SRV-50034,VH-10011,DLR-003,2026-09-16,Scheduled routine maintenance and multi-point inspection,165.0
+SRV-50035,VH-10039,DLR-005,2026-09-17,Scheduled routine maintenance and multi-point inspection,165.0
+SRV-50036,VH-10010,DLR-001,2026-09-17,Front brake rotor and pad replacement,518.6
+SRV-50037,VH-10036,DLR-001,2026-09-18,Alternator replacement due to charging failure,760.01
+SRV-50038,VH-10035,DLR-001,2026-09-18,Alternator replacement due to charging failure,795.98
+SRV-50039,VH-10014,DLR-003,2026-09-19,Oxygen sensor replacement following check engine indicator,307.37
+SRV-50040,VH-10003,DLR-005,2026-09-20,Battery replacement and alternator circuit test,363.39
+SRV-50041,VH-10021,DLR-003,2026-09-21,Alternator replacement due to charging failure,821.66
+SRV-50042,VH-10004,DLR-004,2026-09-21,Front brake rotor and pad replacement,559.19
+SRV-50043,VH-10001,DLR-004,2026-09-22,Suspension strut assembly replacement,950.97
+SRV-50044,VH-10013,DLR-001,2026-09-23,Coolant leak repair and water pump replacement,780.27
+SRV-50045,VH-10050,DLR-002,2026-09-23,Alternator replacement due to charging failure,806.75
+SRV-50046,VH-10016,DLR-002,2026-09-24,Coolant leak repair and water pump replacement,709.65

@@ -1,0 +1,11 @@
+claim_id,vehicle_id,component,claim_date,amount
+CLM-90001,VH-10008,Engine Block Assembly,2026-09-02,590.83
+CLM-90002,VH-10040,Oxygen & Exhaust Gas Sensor,2026-09-03,586.31
+CLM-90003,VH-10033,High-Output Alternator,2026-09-05,687.94
+CLM-90004,VH-10018,Automatic Transmission Unit,2026-09-06,437.74
+CLM-90005,VH-10036,Oxygen & Exhaust Gas Sensor,2026-09-11,873.25
+CLM-90006,VH-10036,Front Ceramic Brake Rotor Set,2026-09-16,897.73
+CLM-90007,VH-10036,12V AGM Auxiliary Battery,2026-09-18,716.95
+CLM-90008,VH-10035,Automatic Transmission Unit,2026-09-18,686.34
+CLM-90009,VH-10004,Front Ceramic Brake Rotor Set,2026-09-21,478.16
+CLM-90010,VH-10001,Engine Block Assembly,2026-09-22,876.33

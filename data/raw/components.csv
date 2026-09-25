@@ -1,0 +1,9 @@
+part_id,name,category,lifespan_km,base_cost,lead_time_days
+PRT-ENG-01,Engine Block Assembly,Powertrain,250000,4500.0,14
+PRT-CLG-02,Water Pump & Thermostat,Cooling System,100000,320.0,5
+PRT-ELC-03,12V AGM Auxiliary Battery,Electrical,60000,210.0,3
+PRT-ALT-04,High-Output Alternator,Electrical,120000,480.0,6
+PRT-BRK-05,Front Ceramic Brake Rotor Set,Braking,70000,290.0,4
+PRT-TRN-06,Automatic Transmission Unit,Powertrain,200000,3800.0,21
+PRT-SUS-07,Adaptive Suspension Strut,Chassis,110000,550.0,8
+PRT-SEN-08,Oxygen & Exhaust Gas Sensor,Sensors,90000,160.0,2
