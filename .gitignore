@@ -26,6 +26,9 @@ htmlcov/
 venv/
 .venv/
 ENV/
+*.duckdb
+*.duckdb.*
+data/warehouse/
 
 # Node / Frontend
 node_modules/
