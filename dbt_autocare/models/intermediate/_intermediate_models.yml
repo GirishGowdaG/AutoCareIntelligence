@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: int_telemetry_trip_sessions
+    description: "Calculates daily active vehicle operating hours and sensor alert counts using windowed timestamp differences bounded by a 300s inactivity threshold."
+    columns:
+      - name: vehicle_key
+        description: "Foreign key reference to dim_vehicle."
+        tests:
+          - not_null
+      - name: date_key
+        description: "Date key representing the telemetry observation day."
+        tests:
+          - not_null
+
+  - name: int_component_failures_joined
+    description: "Aggregates DTC diagnostic trouble codes alongside OEM warranty reimbursement claims by component, vehicle model, and month."
+    columns:
+      - name: component_key
+        description: "Foreign key reference to dim_component."
+        tests:
+          - not_null
+      - name: model_key
+        description: "Foreign key reference to dim_model."
+        tests:
+          - not_null
+      - name: month_key
+        description: "Reporting month in YYYYMM format."
+        tests:
+          - not_null
+
+  - name: int_dealer_service_parts_rollup
+    description: "Combines monthly workshop service invoice volume and revenue with spare-parts inventory stock levels."
+    columns:
+      - name: dealer_key
+        description: "Foreign key reference to dim_dealer."
+        tests:
+          - not_null
+      - name: month_key
+        description: "Reporting month in YYYYMM format."
+        tests:
+          - not_null

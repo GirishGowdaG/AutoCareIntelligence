@@ -1,0 +1,133 @@
+version: 2
+
+models:
+  - name: stg_dim_date
+    description: "Staging model for conformed calendar date dimension."
+    columns:
+      - name: date_key
+        description: "Primary surrogate key in YYYYMMDD format (-1 for unknown)."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_dim_model
+    description: "Staging model for vehicle model specifications."
+    columns:
+      - name: model_key
+        description: "Primary surrogate key (-1 for unknown)."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_dim_dealer
+    description: "Staging model for dealership facility dimension."
+    columns:
+      - name: dealer_key
+        description: "Primary surrogate key (-1 for unknown)."
+        tests:
+          - unique
+          - not_null
+      - name: dealer_id
+        description: "Natural business key for dealership."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_dim_customer
+    description: "Staging model for fleet customer accounts."
+    columns:
+      - name: customer_key
+        description: "Primary surrogate key (-1 for unknown)."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Natural business key for customer account."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_dim_component
+    description: "Staging model for vehicular subsystem components."
+    columns:
+      - name: component_key
+        description: "Primary surrogate key (-1 for unknown)."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_dim_vehicle
+    description: "Staging model for fleet vehicles."
+    columns:
+      - name: vehicle_key
+        description: "Primary surrogate key (-1 for unknown)."
+        tests:
+          - unique
+          - not_null
+      - name: vehicle_id
+        description: "Natural vehicle identifier (VIN/serial)."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_fact_telemetry
+    description: "Staging model for high-frequency CAN bus sensor telemetry."
+    columns:
+      - name: telemetry_fact_id
+        description: "Synthetic primary key."
+        tests:
+          - unique
+          - not_null
+      - name: vehicle_key
+        description: "Foreign key reference to dim_vehicle."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_dim_vehicle')
+              field: vehicle_key
+
+  - name: stg_fact_service
+    description: "Staging model for completed dealership maintenance invoices."
+    columns:
+      - name: service_fact_id
+        description: "Synthetic primary key."
+        tests:
+          - unique
+          - not_null
+      - name: service_id
+        description: "Unique invoice identifier."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_fact_warranty
+    description: "Staging model for OEM reimbursement claims."
+    columns:
+      - name: warranty_fact_id
+        description: "Synthetic primary key."
+        tests:
+          - unique
+          - not_null
+      - name: claim_id
+        description: "Unique claim identifier."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_fact_parts
+    description: "Staging model for periodic spare-parts inventory snapshots."
+    columns:
+      - name: parts_fact_id
+        description: "Synthetic primary key."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_diagnostics
+    description: "Staging model for vehicle diagnostic trouble codes (DTC)."
+    columns:
+      - name: diagnostic_id
+        description: "Deterministic MD5 primary key."
+        tests:
+          - unique
+          - not_null

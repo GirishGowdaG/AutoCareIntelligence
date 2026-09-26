@@ -1,0 +1,13 @@
+autocare_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('AUTOCARE_DB_HOST', '127.0.0.1') }}"
+      user: "{{ env_var('AUTOCARE_DB_USER', 'postgres') }}"
+      password: "{{ env_var('AUTOCARE_DB_PASSWORD', 'postgres') }}"
+      port: "{{ env_var('AUTOCARE_DB_PORT', 5432) | as_number }}"
+      dbname: "{{ env_var('AUTOCARE_DB_NAME', 'autocare_dw') }}"
+      schema: dbt_analytics
+      threads: 4
+      keepalives_idle: 0

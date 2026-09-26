@@ -1,0 +1,36 @@
+version: 2
+
+sources:
+  - name: autocare_dw
+    database: autocare_dw
+    schema: autocare_dw
+    description: "Approved PostgreSQL 16+ core dimensional data warehouse (Phase 2C)."
+    tables:
+      - name: dim_date
+        description: "Standard conformed daily calendar dimension."
+      - name: dim_model
+        description: "Vehicle model engineering specifications dimension."
+      - name: dim_dealer
+        description: "Authorized dealership facilities dimension."
+      - name: dim_customer
+        description: "Customer dimension supporting ownership mapping."
+      - name: dim_component
+        description: "Standardized vehicular subsystem and assembly dimension."
+      - name: dim_vehicle
+        description: "Connected fleet vehicle dimension."
+      - name: fact_telemetry
+        description: "High-frequency CAN bus sensor readings fact table."
+      - name: fact_service
+        description: "Dealership workshop maintenance invoices fact table."
+      - name: fact_warranty
+        description: "OEM warranty reimbursement claims fact table."
+      - name: fact_parts
+        description: "Dealership spare-parts periodic inventory snapshot fact table."
+
+  - name: staging
+    database: autocare_dw
+    schema: staging
+    description: "Isolated lakehouse staging area external to autocare_dw dimensional model."
+    tables:
+      - name: silver_diagnostics
+        description: "Silver lakehouse diagnostics events loaded by lakehouse/load_staging.py."

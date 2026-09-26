@@ -1,0 +1,33 @@
+name: 'autocare_dbt'
+version: '1.0.0'
+config-version: 2
+
+profile: 'autocare_dbt'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  # Explicitly documented as PROPOSED INITIAL HEURISTIC THRESHOLD (not an OEM standard)
+  vibration_anomaly_threshold: 2.5
+  telemetry_session_gap_seconds: 300
+
+models:
+  autocare_dbt:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
+      +materialized: table
+    marts:
+      +schema: analytics
+      +materialized: table

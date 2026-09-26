@@ -29,6 +29,7 @@ ENV/
 *.duckdb
 *.duckdb.*
 data/warehouse/
+data/pgdata/
 
 # Node / Frontend
 node_modules/
@@ -58,6 +59,7 @@ secrets/
 dbt_autocare/target/
 dbt_autocare/dbt_packages/
 dbt_autocare/logs/
+dbt_autocare/.user.yml
 
 # Airflow
 airflow/logs/

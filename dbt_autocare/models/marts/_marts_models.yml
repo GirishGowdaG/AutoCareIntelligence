@@ -1,0 +1,84 @@
+version: 2
+
+models:
+  - name: mart_vehicle_health_daily
+    description: "Daily fleet vehicle health monitoring, operating hours, and CAN bus sensor alert aggregations."
+    columns:
+      - name: vehicle_health_pk
+        description: "Surrogate primary key: MD5(vehicle_key || '|' || date_key)."
+        tests:
+          - unique
+          - not_null
+      - name: vehicle_key
+        description: "Foreign key reference to dim_vehicle."
+        tests:
+          - not_null
+      - name: date_key
+        description: "Calendar date identifier in YYYYMMDD format."
+        tests:
+          - not_null
+      - name: health_status
+        description: "Categorical health classification: HEALTHY, WARNING, CRITICAL."
+        tests:
+          - accepted_values:
+              values: ['HEALTHY', 'WARNING', 'CRITICAL']
+
+  - name: mart_component_failure_risk
+    description: "Subsystem reliability, DTC error occurrences, and OEM warranty reimbursement exposure by vehicle model and month."
+    columns:
+      - name: component_risk_pk
+        description: "Surrogate primary key: MD5(component_key || '|' || model_key || '|' || month_key)."
+        tests:
+          - unique
+          - not_null
+      - name: component_key
+        description: "Foreign key reference to dim_component."
+        tests:
+          - not_null
+      - name: model_key
+        description: "Foreign key reference to dim_model."
+        tests:
+          - not_null
+      - name: month_key
+        description: "Reporting month in YYYYMM format."
+        tests:
+          - not_null
+      - name: risk_tier
+        description: "Risk tier classification: LOW_RISK, MEDIUM_RISK, HIGH_RISK."
+        tests:
+          - accepted_values:
+              values: ['LOW_RISK', 'MEDIUM_RISK', 'HIGH_RISK']
+
+  - name: mart_warranty_cost_analysis
+    description: "Monthly OEM financial exposure analysis across claimed components."
+    columns:
+      - name: warranty_cost_pk
+        description: "Surrogate primary key: MD5(component_key || '|' || month_key)."
+        tests:
+          - unique
+          - not_null
+      - name: component_key
+        description: "Foreign key reference to dim_component."
+        tests:
+          - not_null
+      - name: month_key
+        description: "Reporting month in YYYYMM format."
+        tests:
+          - not_null
+
+  - name: mart_dealer_operational_summary
+    description: "Monthly dealership workshop throughput, service revenue, and parts stock balances without unsupported metrics."
+    columns:
+      - name: dealer_operational_pk
+        description: "Surrogate primary key: MD5(dealer_key || '|' || month_key)."
+        tests:
+          - unique
+          - not_null
+      - name: dealer_key
+        description: "Foreign key reference to dim_dealer."
+        tests:
+          - not_null
+      - name: month_key
+        description: "Reporting month in YYYYMM format."
+        tests:
+          - not_null
