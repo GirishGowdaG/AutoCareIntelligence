@@ -29,19 +29,25 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Generate AutoCare Intelligence Datasets")
     parser.add_argument("--vehicles", type=int, default=100, help="Number of vehicles in fleet (default: 100)")
     parser.add_argument("--days", type=int, default=60, help="Number of historical days to simulate (default: 60)")
+    parser.add_argument("--months", type=int, default=None, help="Number of historical months to simulate (overrides --days with months * 30)")
     parser.add_argument("--telemetry-samples-per-day", type=int, default=6, help="Telemetry sample count per vehicle per active day (default: 6)")
+    parser.add_argument("--telemetry-frequency", type=int, default=None, help="Alias for --telemetry-samples-per-day")
+    parser.add_argument("--end-date", type=str, default="2026-09-25", help="Reference end date (YYYY-MM-DD) for deterministic generation (default: 2026-09-25)")
     parser.add_argument("--output-dir", type=str, default="data/raw", help="Output directory for generated CSVs (default: data/raw)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility (default: 42)")
     return parser.parse_args()
 
-def generate_datasets(vehicles_count: int, days_count: int, samples_per_day: int, output_dir: str, seed: int = 42):
+def generate_datasets(vehicles_count: int, days_count: int, samples_per_day: int, output_dir: str, seed: int = 42, end_date_str: str = "2026-09-25"):
     random.seed(seed)
     os.makedirs(output_dir, exist_ok=True)
-    end_date = datetime.now().replace(microsecond=0)
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
+    else:
+        end_date = datetime.now().replace(microsecond=0)
     start_date = end_date - timedelta(days=days_count)
 
     print(f"=== Generating AutoCare Intelligence Data ===")
-    print(f"Fleet Size: {vehicles_count} vehicles | Period: {days_count} days | Output: {output_dir}")
+    print(f"Fleet Size: {vehicles_count} vehicles | Period: {days_count} days | End Date: {end_date.strftime('%Y-%m-%d')} | Output: {output_dir}")
 
     # 1. Master Seed Data: Dealers, Components, Customers
     # Save Dealers
@@ -256,10 +262,13 @@ def generate_datasets(vehicles_count: int, days_count: int, samples_per_day: int
 
 if __name__ == "__main__":
     args = parse_args()
+    days_to_run = args.months * 30 if args.months is not None else args.days
+    frequency = args.telemetry_frequency if args.telemetry_frequency is not None else args.telemetry_samples_per_day
     generate_datasets(
         vehicles_count=args.vehicles,
-        days_count=args.days,
-        samples_per_day=args.telemetry_samples_per_day,
+        days_count=days_to_run,
+        samples_per_day=frequency,
         output_dir=args.output_dir,
-        seed=args.seed
+        seed=args.seed,
+        end_date_str=args.end_date
     )

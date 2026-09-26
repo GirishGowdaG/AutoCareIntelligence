@@ -123,14 +123,84 @@ def test_parts_schema_and_lead_times():
         assert r["dealer_id"].startswith("DLR-")
 
 def test_referential_integrity():
-    """Verify foreign key links between service/warranty and vehicles."""
+    """Verify foreign key links between service/warranty/parts and vehicles/dealers/components."""
     vehicles, _ = read_csv_rows("vehicles.csv")
     vehicle_ids = {v["vehicle_id"] for v in vehicles}
+
+    dealers, _ = read_csv_rows("dealers.csv")
+    dealer_ids = {d["dealer_id"] for d in dealers}
+
+    components, _ = read_csv_rows("components.csv")
+    part_ids = {c["part_id"] for c in components}
 
     services, _ = read_csv_rows("service.csv")
     for s in services:
         assert s["vehicle_id"] in vehicle_ids, f"Orphaned service record for vehicle {s['vehicle_id']}"
+        assert s["dealer_id"] in dealer_ids, f"Orphaned service record for dealer {s['dealer_id']}"
 
     warranties, _ = read_csv_rows("warranty.csv")
     for w in warranties:
         assert w["vehicle_id"] in vehicle_ids, f"Orphaned warranty claim for vehicle {w['vehicle_id']}"
+
+    parts, _ = read_csv_rows("parts.csv")
+    for p in parts:
+        assert p["dealer_id"] in dealer_ids, f"Orphaned part dealer link {p['dealer_id']}"
+        assert p["part_id"] in part_ids, f"Orphaned part component link {p['part_id']}"
+
+def test_no_null_values_in_any_dataset():
+    """Verify zero null or empty values across all generated datasets."""
+    all_files = [
+        "vehicles.csv", "telemetry.csv", "diagnostics.csv",
+        "service.csv", "warranty.csv", "parts.csv",
+        "dealers.csv", "components.csv", "customers.csv"
+    ]
+    for filename in all_files:
+        rows, fields = read_csv_rows(filename)
+        for idx, row in enumerate(rows):
+            for col in fields:
+                val = row.get(col)
+                assert val is not None and val.strip() != "", (
+                    f"Null/empty value in {filename} at row {idx} for column '{col}'"
+                )
+
+def test_no_duplicate_rows_in_any_dataset():
+    """Verify zero duplicate rows across all generated datasets."""
+    all_files = [
+        "vehicles.csv", "telemetry.csv", "diagnostics.csv",
+        "service.csv", "warranty.csv", "parts.csv",
+        "dealers.csv", "components.csv", "customers.csv"
+    ]
+    for filename in all_files:
+        rows, fields = read_csv_rows(filename)
+        tuples = [tuple(r[f] for f in fields) for r in rows]
+        assert len(tuples) == len(set(tuples)), f"Duplicate rows detected in {filename}"
+
+def test_auxiliary_dimensions_validity():
+    """Verify supporting dimensions: dealers, components, customers."""
+    dealers, d_fields = read_csv_rows("dealers.csv")
+    assert set(["dealer_id", "name", "region", "city", "bays"]).issubset(set(d_fields))
+    assert len(dealers) >= 5
+
+    components, c_fields = read_csv_rows("components.csv")
+    assert set(["part_id", "name", "category", "lifespan_km", "base_cost", "lead_time_days"]).issubset(set(c_fields))
+    assert len(components) >= 8
+
+    customers, cust_fields = read_csv_rows("customers.csv")
+    assert set(["customer_id", "customer_name", "segment", "region"]).issubset(set(cust_fields))
+    assert len(customers) >= 20
+
+def test_seed_reproducibility(tmp_path):
+    """Verify that identical random seeds and end-dates generate identical datasets."""
+    from data_generator.generate_all import generate_datasets
+
+    dir1 = tmp_path / "run1"
+    dir2 = tmp_path / "run2"
+
+    generate_datasets(vehicles_count=10, days_count=5, samples_per_day=2, output_dir=str(dir1), seed=99, end_date_str="2026-09-25")
+    generate_datasets(vehicles_count=10, days_count=5, samples_per_day=2, output_dir=str(dir2), seed=99, end_date_str="2026-09-25")
+
+    for fname in ["vehicles.csv", "telemetry.csv", "diagnostics.csv", "service.csv", "warranty.csv", "parts.csv"]:
+        content1 = (dir1 / fname).read_text(encoding="utf-8")
+        content2 = (dir2 / fname).read_text(encoding="utf-8")
+        assert content1 == content2, f"Seed reproducibility failed for {fname}"
+

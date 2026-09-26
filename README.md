@@ -137,3 +137,29 @@ All requirements from `AutoCare_Intelligence.pdf` are mapped and tracked across 
 - **Phase 4 (Week 4):** Analytics Marts, ML Models & Decision Engine
 - **Phase 5 (Week 5):** FastAPI Backend & Next.js Frontend
 - **Phase 6 (Week 6):** Containerization, CI/CD, Cloud Deployment & Capstone Demo
+
+### Official Deliverables Inventory (PDF Section 17)
+The project tracks exactly **18 Mandatory Deliverables** and **1 Recommended Deliverable**:
+1. GitHub repository (Mandatory)
+2. Architecture diagram (Mandatory)
+3. ERD / star schema (Mandatory)
+4. Data dictionary (`docs/data_dictionary.md`) (Mandatory)
+5. SQL scripts (Mandatory)
+6. dbt project (Mandatory)
+7. Airflow workflows (Mandatory)
+8. Kafka streaming implementation (Mandatory)
+9. Data-quality tests (Mandatory)
+10. ML/forecasting/risk module (Mandatory)
+11. Automation/notification module (Mandatory)
+12. FastAPI backend (Mandatory)
+13. React/Next.js frontend (Mandatory)
+14. Docker configuration (Mandatory)
+15. CI/CD workflow (Mandatory)
+16. Cloud deployment (Mandatory)
+17. Test cases (Mandatory)
+18. Final presentation (Mandatory)
+19. Demo video (Recommended)
+
+### Architectural & Governance References
+- [Enterprise Data Dictionary](docs/data_dictionary.md)
+- [Architecture & Technology Decisions](docs/architecture/technology_decisions.md)
