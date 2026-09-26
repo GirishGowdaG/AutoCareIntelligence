@@ -147,12 +147,20 @@ def test_referential_integrity():
         assert p["dealer_id"] in dealer_ids, f"Orphaned part dealer link {p['dealer_id']}"
         assert p["part_id"] in part_ids, f"Orphaned part component link {p['part_id']}"
 
+    customers, _ = read_csv_rows("customers.csv")
+    cust_ids = {c["customer_id"] for c in customers}
+    maps, _ = read_csv_rows("vehicle_customer_map.csv")
+    for m in maps:
+        assert m["vehicle_id"] in vehicle_ids, f"Orphaned vehicle mapping {m['vehicle_id']}"
+        assert m["customer_id"] in cust_ids, f"Orphaned customer mapping {m['customer_id']}"
+
 def test_no_null_values_in_any_dataset():
     """Verify zero null or empty values across all generated datasets."""
     all_files = [
         "vehicles.csv", "telemetry.csv", "diagnostics.csv",
         "service.csv", "warranty.csv", "parts.csv",
-        "dealers.csv", "components.csv", "customers.csv"
+        "dealers.csv", "components.csv", "customers.csv",
+        "vehicle_customer_map.csv"
     ]
     for filename in all_files:
         rows, fields = read_csv_rows(filename)
@@ -168,7 +176,8 @@ def test_no_duplicate_rows_in_any_dataset():
     all_files = [
         "vehicles.csv", "telemetry.csv", "diagnostics.csv",
         "service.csv", "warranty.csv", "parts.csv",
-        "dealers.csv", "components.csv", "customers.csv"
+        "dealers.csv", "components.csv", "customers.csv",
+        "vehicle_customer_map.csv"
     ]
     for filename in all_files:
         rows, fields = read_csv_rows(filename)

@@ -118,6 +118,27 @@ def generate_datasets(vehicles_count: int, days_count: int, samples_per_day: int
             writer.writerow(v)
     print(f"Generated {len(vehicles)} vehicle records -> {vehicles_file}")
 
+    # 2b. Proposed Supporting Registration Mapping: vehicle_customer_map
+    # Establishes deterministic vehicle -> customer attribution to support Section 7's customer dimension
+    # without altering the PDF-required schema of vehicles.csv
+    vehicle_customer_mappings = []
+    for idx, v in enumerate(vehicles):
+        assigned_cust_id = customers[idx % len(customers)]["customer_id"]
+        mfg_dt = datetime.strptime(v["manufacture_date"], "%Y-%m-%d")
+        reg_date = (mfg_dt + timedelta(days=14)).strftime("%Y-%m-%d")
+        vehicle_customer_mappings.append({
+            "vehicle_id": v["vehicle_id"],
+            "customer_id": assigned_cust_id,
+            "registration_date": reg_date
+        })
+    map_file = os.path.join(output_dir, "vehicle_customer_map.csv")
+    with open(map_file, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["vehicle_id", "customer_id", "registration_date"])
+        writer.writeheader()
+        for m in vehicle_customer_mappings:
+            writer.writerow(m)
+    print(f"Generated {len(vehicle_customer_mappings)} vehicle-customer mappings -> {map_file}")
+
     # 3. Datasets: Telemetry & Diagnostics
     telemetry_records = []
     diagnostics_records = []
