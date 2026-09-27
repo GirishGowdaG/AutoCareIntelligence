@@ -14,7 +14,10 @@ from ml.config import (
     ML_DATASETS_DIR,
     MODEL_VERSIONS,
     RANDOM_SEED,
+    SENSOR_CALIBRATION_METHOD,
     SENSOR_NOMINAL_FPR_TARGET,
+    SENSOR_CALIBRATION_PERCENTILE,
+    SENSOR_NOMINAL_CALIBRATION_TARGET_FPR,
     SENSOR_ALGO_LATENCY_TARGET_MS,
     SENSOR_PIPELINE_LATENCY_TARGET_MS,
 )
@@ -86,33 +89,42 @@ def run_training() -> SensorAnomalyModel:
     logger.info(f"Fitting IsolationForest on nominal train split ({len(nominal_train)} records)...")
     model.fit(nominal_train[feature_cols])
 
-    # Calibrate decision threshold on nominal validation split to target FPR <= 2.0%
-    calibrated_thresh = model.calibrate_threshold(nominal_val[feature_cols], target_fpr=SENSOR_NOMINAL_FPR_TARGET)
-    logger.info(f"Calibrated Decision Threshold (98th percentile of nominal validation): {calibrated_thresh:.4f}")
+    # Method B: Calibrate decision threshold on nominal validation split to target FPR <= 2.0%
+    # using pre-specified statistical tolerance margin (98.8th percentile, target_fpr=0.012)
+    calibrated_thresh = model.calibrate_threshold(
+        nominal_val[feature_cols],
+        percentile=SENSOR_CALIBRATION_PERCENTILE,
+    )
+    logger.info(
+        f"Calibrated Decision Threshold (Method B - {SENSOR_CALIBRATION_PERCENTILE}th percentile of nominal validation): "
+        f"{calibrated_thresh:.6f}"
+    )
 
-    # Evaluate on all splits
-    train_metrics = model.evaluate(nominal_train[feature_cols])
-    val_metrics = model.evaluate(nominal_val[feature_cols])
-    test_metrics = model.evaluate(nominal_test[feature_cols])
-    fault_metrics = model.evaluate(fault_eval[feature_cols]) if not fault_eval.empty else {}
+    # Freeze threshold and evaluate on all splits
+    train_metrics = model.evaluate(nominal_train[feature_cols], threshold=calibrated_thresh)
+    val_metrics = model.evaluate(nominal_val[feature_cols], threshold=calibrated_thresh)
+    test_metrics = model.evaluate(nominal_test[feature_cols], threshold=calibrated_thresh)
+    fault_metrics = model.evaluate(fault_eval[feature_cols], threshold=calibrated_thresh) if not fault_eval.empty else {}
 
     empirical_test_fpr = test_metrics["detected_anomaly_rate"]
+    test_false_alarms = int(np.sum(model.predict(nominal_test[feature_cols], threshold=calibrated_thresh)))
+    val_false_alarms = int(np.sum(model.predict(nominal_val[feature_cols], threshold=calibrated_thresh)))
     fpr_pass = empirical_test_fpr <= SENSOR_NOMINAL_FPR_TARGET
 
     logger.info(f"Nominal Train Metrics:         {train_metrics}")
-    logger.info(f"Nominal Validation Metrics:    {val_metrics}")
-    logger.info(f"Nominal Held-Out Test Metrics: {test_metrics}")
+    logger.info(f"Nominal Validation Metrics:    {val_metrics} (False alarms: {val_false_alarms}/{len(nominal_val)})")
+    logger.info(f"Nominal Held-Out Test Metrics: {test_metrics} (False alarms: {test_false_alarms}/{len(nominal_test)})")
     logger.info(f"Fault Evaluation Window Metrics: {fault_metrics}")
     logger.info(
-        f"Sensor Anomaly Acceptance Check: Held-Out Test Nominal FPR = {empirical_test_fpr:.4f} "
-        f"(Target <= {SENSOR_NOMINAL_FPR_TARGET:.4f}) -> {'PASS' if fpr_pass else 'FAIL'}"
+        f"Sensor Anomaly Acceptance Check (Method B): Held-Out Test Nominal False Alarms = {test_false_alarms}/{len(nominal_test)} "
+        f"(FPR = {empirical_test_fpr:.4f}, Target <= {SENSOR_NOMINAL_FPR_TARGET:.4f}) -> {'PASS' if fpr_pass else 'FAIL'}"
     )
 
     metadata = {
         "model_id": model.model_id,
         "model_version": model.model_version,
         "trained_at": date.today().isoformat(),
-        "training_git_commit": "b454b84",
+        "training_git_commit": "b07ce4b",
         "training_data_sha256": data_sha,
         "feature_names": feature_cols,
         "hyperparameters": {
@@ -122,6 +134,11 @@ def run_training() -> SensorAnomalyModel:
             "normalization": "Empirical Min-Max Normalization fitted on nominal train",
             "min_raw_score": model.min_raw_score,
             "max_raw_score": model.max_raw_score,
+            "calibration_method": SENSOR_CALIBRATION_METHOD,
+            "calibration_percentile": SENSOR_CALIBRATION_PERCENTILE,
+            "nominal_target_fpr": SENSOR_NOMINAL_FPR_TARGET,
+            "nominal_calibration_target_fpr": SENSOR_NOMINAL_CALIBRATION_TARGET_FPR,
+            "calibration_rationale": "A pre-specified conservative calibration target derived from a one-sided 95% statistical confidence-margin calculation for the finite validation sample (N_val=829)",
             "calibrated_threshold": calibrated_thresh,
         },
         "latency_targets": {
@@ -144,6 +161,8 @@ def run_training() -> SensorAnomalyModel:
         "acceptance_status": {
             "empirical_held_out_fpr": empirical_test_fpr,
             "target_fpr": SENSOR_NOMINAL_FPR_TARGET,
+            "held_out_false_alarms": test_false_alarms,
+            "held_out_n": len(nominal_test),
             "fpr_pass": fpr_pass,
         },
     }

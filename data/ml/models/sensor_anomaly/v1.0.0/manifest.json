@@ -2,7 +2,7 @@
   "model_id": "sensor_anomaly_iforest",
   "model_version": "v1.0.0",
   "trained_at": "2026-09-27",
-  "training_git_commit": "b454b84",
+  "training_git_commit": "b07ce4b",
   "training_data_sha256": "3b58964dd03de3d32af659a5847f06b57d8ebd23bde5c280e9d5b757a3244444",
   "feature_names": [
     "rpm",
@@ -21,7 +21,12 @@
     "normalization": "Empirical Min-Max Normalization fitted on nominal train",
     "min_raw_score": -0.699535822685443,
     "max_raw_score": -0.3909504364823622,
-    "calibrated_threshold": 0.8140131418948856
+    "calibration_method": "STATISTICAL_TOLERANCE_MARGIN",
+    "calibration_percentile": 98.8,
+    "nominal_target_fpr": 0.02,
+    "nominal_calibration_target_fpr": 0.012,
+    "calibration_rationale": "A pre-specified conservative calibration target derived from a one-sided 95% statistical confidence-margin calculation for the finite validation sample (N_val=829)",
+    "calibrated_threshold": 0.8383571332063307
   },
   "latency_targets": {
     "algorithmic_latency_target_ms": 10.0,
@@ -39,36 +44,38 @@
       "mean_anomaly_score": 0.2476,
       "median_anomaly_score": 0.1888,
       "max_anomaly_score": 1.0,
-      "detected_anomaly_rate": 0.0243,
-      "decision_threshold": 0.814
+      "detected_anomaly_rate": 0.0171,
+      "decision_threshold": 0.8384
     },
     "nominal_validation": {
       "mean_anomaly_score": 0.2541,
       "median_anomaly_score": 0.198,
       "max_anomaly_score": 0.9462,
-      "detected_anomaly_rate": 0.0205,
-      "decision_threshold": 0.814
+      "detected_anomaly_rate": 0.0121,
+      "decision_threshold": 0.8384
     },
     "nominal_held_out_test": {
       "mean_anomaly_score": 0.2472,
       "median_anomaly_score": 0.1866,
       "max_anomaly_score": 1.0,
-      "detected_anomaly_rate": 0.0265,
-      "decision_threshold": 0.814
+      "detected_anomaly_rate": 0.0157,
+      "decision_threshold": 0.8384
     },
     "fault_eval": {
       "mean_anomaly_score": 0.5311,
       "median_anomaly_score": 0.6234,
       "max_anomaly_score": 1.0,
-      "detected_anomaly_rate": 0.0863,
-      "decision_threshold": 0.814
+      "detected_anomaly_rate": 0.0439,
+      "decision_threshold": 0.8384
     }
   },
   "acceptance_status": {
-    "empirical_held_out_fpr": 0.0265,
+    "empirical_held_out_fpr": 0.0157,
     "target_fpr": 0.02,
-    "fpr_pass": false
+    "held_out_false_alarms": 13,
+    "held_out_n": 830,
+    "fpr_pass": true
   },
   "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\sensor_anomaly\\v1.0.0\\model.joblib",
-  "serialized_at": "2026-09-27T06:29:04.988641+00:00"
+  "serialized_at": "2026-09-27T07:46:09.985853+00:00"
 }

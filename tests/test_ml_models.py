@@ -50,7 +50,7 @@ class TestMLModels:
         loaded_probs = loaded_model.predict_proba(X)
         np.testing.assert_allclose(probs, loaded_probs)
 
-    def test_sensor_anomaly_scorer(self):
+    def test_sensor_anomaly_scorer(self, tmp_path):
         X_train = pd.DataFrame({
             "rpm": [2000.0, 2200.0, 2100.0, 2300.0, 2050.0],
             "temperature": [85.0, 86.0, 84.0, 85.5, 84.5],
@@ -78,6 +78,17 @@ class TestMLModels:
         outlier_score = model.score_samples(X_outlier)[0]
         assert outlier_score >= scores[0]
 
+        # Serialization & Deserialization restores calibrated threshold and min/max scores
+        art_dir = tmp_path / "sensor_model_out"
+        model.save(art_dir)
+        assert (art_dir / "model.joblib").exists()
+        assert (art_dir / "manifest.json").exists()
+
+        loaded = SensorAnomalyModel().load(art_dir / "model.joblib")
+        assert np.isclose(loaded.calibrated_threshold, thresh)
+        assert np.isclose(loaded.min_raw_score, model.min_raw_score)
+        assert np.isclose(loaded.max_raw_score, model.max_raw_score)
+
         # Streaming scorer integration
         scorer = StreamingSensorScorer(model=model)
         res = scorer.score_event({"rpm": 9500, "temperature": 145, "battery": 15, "vibration": 9.5})
@@ -85,6 +96,32 @@ class TestMLModels:
         assert "algorithmic_latency_ms" in res
         assert res["algorithmic_latency_ms"] < 50.0  # Engineering measurement target (< 10ms typical)
         assert res["inference_mode"] == "STREAMING_REALTIME"
+
+    def test_sensor_anomaly_method_b_statistical_tolerance_calibration(self):
+        """Verify Method B pre-specified statistical tolerance margin calibration on validation split only."""
+        rng = np.random.default_rng(42)
+        # Synthetic nominal train, val, and test splits
+        X_train = pd.DataFrame({"feat1": rng.normal(0, 1, 500), "feat2": rng.normal(0, 1, 500)})
+        X_val = pd.DataFrame({"feat1": rng.normal(0, 1, 200), "feat2": rng.normal(0, 1, 200)})
+        X_test = pd.DataFrame({"feat1": rng.normal(0, 1, 200), "feat2": rng.normal(0, 1, 200)})
+
+        model = SensorAnomalyModel(n_estimators=30, contamination=0.02, random_state=42)
+        model.fit(X_train)
+
+        # Method B uses pre-specified 98.8th percentile on validation data only
+        calibrated_thresh = model.calibrate_threshold(X_val, percentile=98.8)
+        assert 0.0 < calibrated_thresh < 1.0
+
+        # Verification on validation split
+        val_anomalies = model.predict(X_val)
+        val_fpr = np.mean(val_anomalies)
+        # Validation FPR should be near conservative target 1.2% (at most ~3 detections in 200)
+        assert val_fpr <= 0.025
+
+        # Verification on held-out test split (test split was strictly unpassed into fit or calibrate_threshold)
+        test_anomalies = model.predict(X_test)
+        test_fpr = np.mean(test_anomalies)
+        assert test_fpr <= 0.05  # Bound on test distribution
 
     def test_demand_forecast_model(self):
         X = pd.DataFrame({

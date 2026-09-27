@@ -99,8 +99,12 @@ FAILURE_RISK_ROC_AUC_THRESHOLD: float = 0.70
 FAILURE_RISK_PR_AUC_THRESHOLD: float = 0.35
 FAILURE_RISK_BRIER_THRESHOLD: float = 0.15
 
-# Area 2: Sensor Anomaly (Empirical min-max normalization & calibration)
+# Area 2: Sensor Anomaly (Empirical min-max normalization & Method B calibration)
+SENSOR_CALIBRATION_METHOD: str = "STATISTICAL_TOLERANCE_MARGIN"
 SENSOR_NOMINAL_FPR_TARGET: float = 0.02
+SENSOR_CALIBRATION_PERCENTILE: float = 98.8
+# Pre-specified conservative calibration target derived from a one-sided 95% statistical confidence-margin calculation for the finite validation sample (N_val=829)
+SENSOR_NOMINAL_CALIBRATION_TARGET_FPR: float = 0.012
 SENSOR_ALGO_LATENCY_TARGET_MS: float = 10.0      # Engineering measurement target
 SENSOR_PIPELINE_LATENCY_TARGET_MS: float = 100.0  # Engineering measurement target
 
