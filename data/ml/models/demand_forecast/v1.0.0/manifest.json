@@ -1,0 +1,33 @@
+{
+  "model_id": "service_demand_forecast_rf",
+  "model_version": "v1.0.0",
+  "trained_at": "2026-09-27",
+  "training_git_commit": "a7fc266",
+  "training_data_sha256": "ccd2fadda97e100f39a8e72c5cc402a05e6be7c1fd15c1c827dc86213182c9fc",
+  "feature_names": [
+    "service_count_lag_7d",
+    "service_count_lag_14d",
+    "rolling_mean_service_count_7d",
+    "day_of_week",
+    "is_weekend"
+  ],
+  "hyperparameters": {
+    "n_estimators": 100,
+    "max_depth": 5,
+    "random_state": 42
+  },
+  "metrics": {
+    "train": {
+      "wape": 0.9945,
+      "mae": 0.3113,
+      "rmse": 0.3996
+    },
+    "test": {
+      "wape": 1.4982,
+      "mae": 0.4281,
+      "rmse": 0.5445
+    }
+  },
+  "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\demand_forecast\\v1.0.0\\model.joblib",
+  "serialized_at": "2026-09-27T05:12:08.846644+00:00"
+}

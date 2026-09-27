@@ -1,0 +1,38 @@
+{
+  "model_id": "sensor_anomaly_iforest",
+  "model_version": "v1.0.0",
+  "trained_at": "2026-09-27",
+  "training_git_commit": "a7fc266",
+  "training_data_sha256": "f2613ce7ca1059dae00c4bd7232c291d2a0f970935e0deb41cc2131c076f22da",
+  "feature_names": [
+    "rpm",
+    "temperature",
+    "battery",
+    "vibration",
+    "norm_rpm",
+    "norm_temperature",
+    "norm_vibration",
+    "vibration_per_rpm_ratio"
+  ],
+  "hyperparameters": {
+    "contamination": 0.02,
+    "n_estimators": 100,
+    "random_state": 42
+  },
+  "metrics": {
+    "nominal_train": {
+      "mean_anomaly_score": 0.9085,
+      "median_anomaly_score": 0.9036,
+      "max_anomaly_score": 0.9728,
+      "detected_anomaly_rate": 1.0
+    },
+    "fault_eval": {
+      "mean_anomaly_score": 0.937,
+      "median_anomaly_score": 0.9485,
+      "max_anomaly_score": 0.9748,
+      "detected_anomaly_rate": 1.0
+    }
+  },
+  "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\sensor_anomaly\\v1.0.0\\model.joblib",
+  "serialized_at": "2026-09-27T05:11:59.919894+00:00"
+}

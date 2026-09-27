@@ -1,0 +1,26 @@
+{
+  "model_id": "warranty_anomaly_iforest",
+  "model_version": "v1.0.0",
+  "trained_at": "2026-09-27",
+  "training_git_commit": "a7fc266",
+  "training_data_sha256": "b1175de38604ac702012baf2993afaf7223ab53548f9d560e179b15a1120ad4c",
+  "feature_names": [
+    "claim_amount",
+    "claim_amount_to_component_median_ratio",
+    "component_claim_iqr_distance",
+    "rolling_vehicle_claims_30d"
+  ],
+  "hyperparameters": {
+    "contamination": 0.02,
+    "n_estimators": 100,
+    "random_state": 42
+  },
+  "metrics": {
+    "mean_anomaly_score": 0.927,
+    "median_anomaly_score": 0.926,
+    "max_anomaly_score": 0.945,
+    "outlier_rate": 1.0
+  },
+  "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\warranty_anomaly\\v1.0.0\\model.joblib",
+  "serialized_at": "2026-09-27T05:12:47.493036+00:00"
+}

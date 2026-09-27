@@ -1,0 +1,47 @@
+{
+  "model_id": "vehicle_failure_risk_rf",
+  "model_version": "v1.0.0",
+  "trained_at": "2026-09-27",
+  "training_git_commit": "a7fc266",
+  "training_data_sha256": "6b69f6a23fa72cc3bb1395b7581c7f7b6fd5fdf330f8a0ad45f397f7c2898634",
+  "feature_names": [
+    "telemetry_avg_engine_temp_30d",
+    "telemetry_max_engine_temp_7d",
+    "telemetry_vibration_stddev_30d",
+    "telemetry_battery_min_7d",
+    "telemetry_high_rpm_ping_count_30d",
+    "dtc_critical_high_count_30d",
+    "historical_service_count",
+    "days_since_last_service"
+  ],
+  "hyperparameters": {
+    "n_estimators": 100,
+    "max_depth": 4,
+    "random_state": 42
+  },
+  "metrics": {
+    "train": {
+      "pr_auc": 1.0,
+      "roc_auc": 1.0,
+      "brier_score": 0.0039,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "val": {
+      "pr_auc": 0.9354,
+      "roc_auc": 0.5733,
+      "brier_score": 0.1004,
+      "precision": 0.9149,
+      "recall": 0.9556
+    },
+    "test": {
+      "pr_auc": 0.958,
+      "roc_auc": 0.6933,
+      "brier_score": 0.1,
+      "precision": 0.898,
+      "recall": 0.9778
+    }
+  },
+  "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\failure_risk\\v1.0.0\\model.joblib",
+  "serialized_at": "2026-09-27T05:11:38.966419+00:00"
+}
