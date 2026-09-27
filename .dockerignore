@@ -1,0 +1,17 @@
+.git
+.github
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.venv
+venv
+data/
+!data/ml/models/
+frontend/.next
+frontend/node_modules
+.pytest_cache
+.vscode
+.idea
+*.log
+deploy/data

@@ -4,6 +4,7 @@ Defines database settings, directory paths, deterministic mappings, feature sets
 and temporal windowing parameters.
 """
 
+import os
 from pathlib import Path
 from typing import Dict, Any, Set, List
 
@@ -11,10 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Database Connection Parameters
 PG_CONFIG: Dict[str, Any] = {
-    "dbname": "autocare_dw",
-    "user": "postgres",
-    "host": "127.0.0.1",
-    "port": 5432,
+    "dbname": os.getenv("AUTOCARE_DB_NAME", os.getenv("PGDATABASE", "autocare_dw")),
+    "user": os.getenv("AUTOCARE_DB_USER", os.getenv("PGUSER", "postgres")),
+    "password": os.getenv("AUTOCARE_DB_PASSWORD", os.getenv("PGPASSWORD", "")),
+    "host": os.getenv("AUTOCARE_DB_HOST", os.getenv("PGHOST", "127.0.0.1")),
+    "port": int(os.getenv("AUTOCARE_DB_PORT", os.getenv("PGPORT", "5432"))),
 }
 
 # Storage Directories

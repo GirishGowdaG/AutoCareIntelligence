@@ -1,0 +1,41 @@
+# Stage 1: Dependency Resolution
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --user --no-warn-script-location -r requirements.txt
+
+# Stage 2: Runtime Image with procps for pgrep process liveness
+FROM python:3.11-slim AS runner
+
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/home/appuser/.local/bin:$PATH"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    procps \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 10002 appuser
+
+COPY --from=builder /root/.local /home/appuser/.local
+COPY --chown=appuser:appuser automation/ /app/automation/
+COPY --chown=appuser:appuser ml/ /app/ml/
+COPY --chown=appuser:appuser data/ml/models/ /app/data/ml/models/
+
+USER appuser
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
+  CMD pgrep -f '[a]utomation.worker' || exit 1
+
+CMD ["python", "-c", "from automation.worker import AutomationWorker; worker = AutomationWorker(); worker.run_kafka_consumer_loop()"]

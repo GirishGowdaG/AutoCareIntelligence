@@ -1,0 +1,147 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: autocare-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: autocare_dw
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${AUTOCARE_POSTGRES_ADMIN_PASSWORD:?Error: AUTOCARE_POSTGRES_ADMIN_PASSWORD required}"
+      AUTOCARE_BACKEND_DB_PASSWORD: "${AUTOCARE_BACKEND_DB_PASSWORD:?Error: AUTOCARE_BACKEND_DB_PASSWORD required}"
+      AUTOCARE_WORKER_DB_PASSWORD: "${AUTOCARE_WORKER_DB_PASSWORD:?Error: AUTOCARE_WORKER_DB_PASSWORD required}"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - "${AUTOCARE_SNAPSHOT_FILE:?Error: AUTOCARE_SNAPSHOT_FILE required}:/docker-entrypoint-initdb.d/01_restore_snapshot.sql:ro"
+      - ./deploy/docker/02_provision_roles.sh:/docker-entrypoint-initdb.d/02_provision_roles.sh:ro
+    networks:
+      - autocare-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d autocare_dw"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: autocare-kafka
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: "4L62EnnTTMbgQKd3f0Daww"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/tmp/kraft-combined-logs
+    networks:
+      - autocare-net
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: autocare-backend
+    restart: unless-stopped
+    environment:
+      AUTOCARE_DB_HOST: postgres
+      AUTOCARE_DB_PORT: 5432
+      AUTOCARE_DB_NAME: autocare_dw
+      AUTOCARE_DB_USER: autocare_backend
+      AUTOCARE_DB_PASSWORD: "${AUTOCARE_BACKEND_DB_PASSWORD:?Error: AUTOCARE_BACKEND_DB_PASSWORD required}"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - autocare-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  automation-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: autocare-automation-worker
+    restart: unless-stopped
+    environment:
+      AUTOCARE_DB_HOST: postgres
+      AUTOCARE_DB_PORT: 5432
+      AUTOCARE_DB_NAME: autocare_dw
+      AUTOCARE_DB_USER: autocare_worker
+      AUTOCARE_DB_PASSWORD: "${AUTOCARE_WORKER_DB_PASSWORD:?Error: AUTOCARE_WORKER_DB_PASSWORD required}"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - autocare-net
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f '[a]utomation.worker' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: "${NEXT_PUBLIC_API_URL:-http://localhost:8000}"
+    container_name: autocare-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: "${NEXT_PUBLIC_API_URL:-http://localhost:8000}"
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - autocare-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  autocare-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  kafka_data:
