@@ -82,7 +82,10 @@ class TestMLStorageIsolation:
             "vehicle_failure_predictions",
             "warranty_anomalies",
         ]
-        assert sorted(ml_tables) == sorted(expected_ml_tables)
+        # In Phase 6 Stage 1, ml_inference houses the action_logs audit table alongside Phase 5 ML tables
+        for expected_table in expected_ml_tables:
+            assert expected_table in ml_tables, f"Missing required ML table: {expected_table}"
+        assert set(ml_tables) - {"action_logs"} == set(expected_ml_tables)
 
     def test_model_metadata_registry_records(self, db_conn):
         """Verify model_metadata contains all 4 registered models with actual training commits and metrics."""
