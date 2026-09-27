@@ -6,8 +6,6 @@ import {
   Radio,
   Activity,
   Zap,
-  CheckCircle2,
-  AlertTriangle,
   ArrowRight,
   Trash2,
 } from "lucide-react";
@@ -77,7 +75,13 @@ export function AlertCenter({
             }`}
           />
           <span className="font-semibold text-slate-200 capitalize">
-            {source === "kafka" ? "[LIVE: Kafka Telemetry]" : "[DEMO MODE: Synthetic Telemetry]"}
+            {source === "kafka"
+              ? "[LIVE: Kafka Telemetry]"
+              : source === "action_logs"
+              ? "[LIVE: Action Logs]"
+              : source === "server"
+              ? "[SERVER: Heartbeat Active]"
+              : "[DEMO MODE: Synthetic Telemetry]"}
           </span>
         </div>
         <span className="text-[11px] text-slate-500">
@@ -90,67 +94,74 @@ export function AlertCenter({
         {events.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-center text-slate-500">
             <Radio className="h-8 w-8 text-slate-600 mb-2" />
-            <p className="text-xs">Listening for real-time telemetry and automation events...</p>
+            <p className="text-xs">Listening for real-time telemetry pulses and audit action events...</p>
           </div>
         ) : (
           events.map((evt, idx) => {
-            if (evt.type === "sensor_reading") {
-              const item = evt.data;
+            // 1. telemetry_pulse event card
+            if (evt.type === "telemetry_pulse") {
+              const pulse = evt.data;
+              const tel = pulse.data;
+              const vehicleId = tel.vehicle_id || "VH001";
               return (
                 <div
-                  key={`sensor-${idx}-${item.timestamp}`}
+                  key={`tel-${idx}-${pulse.timestamp}`}
                   className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition hover:border-slate-700"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
                       <Activity className="h-4 w-4 text-blue-400" />
-                      <span>CAN-Bus Reading</span>
+                      <span>Telemetry Pulse</span>
                     </div>
-                    {item.is_anomaly ? (
-                      <StatusBadge status="ANOMALY" size="sm" />
-                    ) : (
-                      <StatusBadge status="NORMAL" size="sm" />
-                    )}
+                    <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-300 border border-slate-700">
+                      {pulse.source === "kafka" ? "KAFKA" : "SYNTHETIC DEMO"}
+                    </span>
                   </div>
 
                   <div className="mt-2 text-xs text-slate-400">
-                    Vehicle: <span className="font-mono text-slate-200">{item.vehicle_id}</span>
+                    Vehicle: <span className="font-mono text-slate-200">{vehicleId}</span>
                   </div>
 
-                  <div className="mt-2 grid grid-cols-3 gap-2 rounded-lg bg-slate-950 p-2 text-center text-[11px]">
+                  <div className="mt-2 grid grid-cols-4 gap-2 rounded-lg bg-slate-950 p-2 text-center text-[11px]">
                     <div>
-                      <div className="text-slate-500">RPM</div>
-                      <div className="font-mono font-medium text-slate-300">{item.rpm}</div>
+                      <div className="text-slate-500 text-[10px]">RPM</div>
+                      <div className="font-mono font-medium text-slate-300">{tel.rpm}</div>
                     </div>
                     <div>
-                      <div className="text-slate-500">Speed</div>
-                      <div className="font-mono font-medium text-slate-300">{item.speed_kmh} km/h</div>
+                      <div className="text-slate-500 text-[10px]">Temp</div>
+                      <div className="font-mono font-medium text-slate-300">{tel.temperature}°C</div>
                     </div>
                     <div>
-                      <div className="text-slate-500">Coolant</div>
-                      <div className="font-mono font-medium text-slate-300">{item.coolant_temp_c}°C</div>
+                      <div className="text-slate-500 text-[10px]">Battery</div>
+                      <div className="font-mono font-medium text-slate-300">{tel.battery}V</div>
+                    </div>
+                    <div>
+                      <div className="text-slate-500 text-[10px]">Vibration</div>
+                      <div className="font-mono font-medium text-slate-300">{tel.vibration}</div>
                     </div>
                   </div>
 
                   <div className="mt-2 flex items-center justify-between pt-1 text-[11px] text-slate-500 border-t border-slate-850">
-                    <span>Score: {item.anomaly_score.toFixed(4)}</span>
+                    <span>{formatDate(pulse.timestamp)}</span>
                     <Link
-                      href={`/sensor-anomalies?vehicle_id=${encodeURIComponent(item.vehicle_id)}`}
+                      href={`/sensor-anomalies?vehicle_id=${encodeURIComponent(vehicleId)}`}
                       onClick={onClose}
                       className="flex items-center gap-1 text-blue-400 hover:text-blue-300"
                     >
-                      Inspect <ArrowRight className="h-3 w-3" />
+                      Monitor <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
                 </div>
               );
             }
 
-            if (evt.type === "action_event") {
-              const action = evt.data;
+            // 2. audit_action event card
+            if (evt.type === "audit_action") {
+              const audit = evt.data;
+              const action = audit.action;
               return (
                 <div
-                  key={`action-${idx}-${action.executed_at}`}
+                  key={`act-${idx}-${audit.timestamp}`}
                   className="rounded-xl border border-slate-800 bg-slate-900/40 p-3.5 transition hover:border-slate-700"
                 >
                   <div className="flex items-center justify-between">
@@ -158,16 +169,20 @@ export function AlertCenter({
                       <Zap className="h-4 w-4 text-amber-400" />
                       <span>{action.rule_id}</span>
                     </div>
-                    <StatusBadge status={action.delivery_status} size="sm" />
+                    {action.delivery_status && (
+                      <StatusBadge status={action.delivery_status} size="sm" />
+                    )}
                   </div>
 
                   <div className="mt-2 text-xs text-slate-400">
                     Target: <span className="font-mono text-slate-200">{action.entity_type} {action.entity_id}</span>
                   </div>
 
-                  <div className="mt-1 text-xs text-slate-400">
-                    Type: <span className="text-slate-300">{action.action_type}</span> ({action.priority})
-                  </div>
+                  {action.action_taken && (
+                    <div className="mt-1 text-xs text-slate-300 font-sans">
+                      {action.action_taken}
+                    </div>
+                  )}
 
                   {action.entity_type === "CLAIM" && (
                     <div className="mt-2 flex items-center justify-between pt-1 text-[11px] border-t border-slate-850">

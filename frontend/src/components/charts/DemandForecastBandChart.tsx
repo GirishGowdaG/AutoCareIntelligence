@@ -11,7 +11,6 @@ import {
   Tooltip,
 } from "recharts";
 import { ServiceDemandForecast } from "@/types/ml";
-import { formatDate } from "@/lib/utils";
 
 interface DemandForecastBandChartProps {
   data: ServiceDemandForecast[];
@@ -21,15 +20,20 @@ export function DemandForecastBandChart({ data }: DemandForecastBandChartProps) 
   // Sort by date ascending
   const chartData = [...data]
     .sort((a, b) => new Date(a.forecast_date).getTime() - new Date(b.forecast_date).getTime())
-    .map((item) => ({
-      date: item.forecast_date.split("T")[0],
-      predicted: item.predicted_demand,
-      lower: item.lower_bound,
-      upper: item.upper_bound,
-      band: [item.lower_bound, item.upper_bound],
-      is_surge: item.is_surge,
-      dealer_id: item.dealer_id,
-    }));
+    .map((item) => {
+      const pred = item.predicted_volume ?? 0;
+      const lower = item.lower_bound_80 ?? 0;
+      const upper = item.upper_bound_80 ?? 0;
+      return {
+        date: String(item.forecast_date).split("T")[0],
+        predicted: pred,
+        lower: lower,
+        upper: upper,
+        band: [lower, upper],
+        is_surge: Boolean(item.is_surge),
+        dealer_id: item.dealer_id,
+      };
+    });
 
   return (
     <div className="h-72 w-full">
@@ -61,7 +65,7 @@ export function DemandForecastBandChart({ data }: DemandForecastBandChartProps) 
                       Forecast Demand: <strong>{item.predicted.toFixed(1)}</strong> units
                     </div>
                     <div className="text-slate-400 text-[11px]">
-                      Confidence Interval: [{item.lower.toFixed(1)} — {item.upper.toFixed(1)}]
+                      80% Confidence Interval: [{item.lower.toFixed(1)} — {item.upper.toFixed(1)}]
                     </div>
                     {item.is_surge && (
                       <div className="mt-1 rounded bg-rose-950/80 px-2 py-0.5 text-[10px] font-bold text-rose-300 border border-rose-800">
@@ -74,7 +78,7 @@ export function DemandForecastBandChart({ data }: DemandForecastBandChartProps) 
               return null;
             }}
           />
-          {/* Confidence interval band */}
+          {/* 80% confidence interval band */}
           <Area
             type="monotone"
             dataKey="band"

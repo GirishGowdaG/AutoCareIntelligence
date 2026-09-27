@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useAuthRole } from "./useAuthRole";
 import {
-  LiveActionEvent,
-  LiveSensorEvent,
+  AuditActionEvent,
+  HeartbeatEvent,
   SSEEventPayload,
+  TelemetryPulseEvent,
 } from "@/types/audit";
 
 export type ConnectionStatus = "DISCONNECTED" | "CONNECTING" | "CONNECTED" | "ERROR";
@@ -15,14 +16,15 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export function useSSEStream() {
   const { apiKey } = useAuthRole();
   const [status, setStatus] = useState<ConnectionStatus>("DISCONNECTED");
-  const [source, setSource] = useState<"kafka" | "synthetic_demo" | null>(null);
+  const [source, setSource] = useState<"kafka" | "synthetic_demo" | "action_logs" | "server" | null>(null);
   const [events, setEvents] = useState<SSEEventPayload[]>([]);
-  const [latestSensorEvent, setLatestSensorEvent] = useState<LiveSensorEvent | null>(null);
-  const [latestActionEvent, setLatestActionEvent] = useState<LiveActionEvent | null>(null);
+  const [latestTelemetry, setLatestTelemetry] = useState<TelemetryPulseEvent | null>(null);
+  const [latestAction, setLatestAction] = useState<AuditActionEvent | null>(null);
   const [lastHeartbeat, setLastHeartbeat] = useState<string | null>(null);
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastEventIdRef = useRef<string | null>(null);
 
   const clearEvents = useCallback(() => {
     setEvents([]);
@@ -43,7 +45,11 @@ export function useSSEStream() {
 
       setStatus("CONNECTING");
 
-      const streamUrl = `${BASE_URL}/api/v1/stream/events?api_key=${encodeURIComponent(apiKey)}`;
+      let streamUrl = `${BASE_URL}/api/v1/stream/events?api_key=${encodeURIComponent(apiKey)}`;
+      if (lastEventIdRef.current) {
+        streamUrl += `&last_event_id=${encodeURIComponent(lastEventIdRef.current)}`;
+      }
+
       const es = new EventSource(streamUrl);
       eventSourceRef.current = es;
 
@@ -52,38 +58,53 @@ export function useSSEStream() {
         setStatus("CONNECTED");
       };
 
-      es.addEventListener("sensor_reading", (e: MessageEvent) => {
+      // 1. telemetry_pulse event listener
+      es.addEventListener("telemetry_pulse", (e: MessageEvent) => {
         if (!isMounted) return;
+        if (e.lastEventId) {
+          lastEventIdRef.current = e.lastEventId;
+        }
         try {
-          const payload = JSON.parse(e.data) as LiveSensorEvent;
-          if (payload.source === "kafka" || payload.source === "synthetic_demo") {
-            setSource(payload.source);
+          const payload = JSON.parse(e.data) as TelemetryPulseEvent;
+          if (payload.source) {
+            setSource(payload.source as "kafka" | "synthetic_demo");
           }
-          setLatestSensorEvent(payload);
-          setEvents((prev) => [{ type: "sensor_reading", data: payload }, ...prev.slice(0, 49)]);
+          setLatestTelemetry(payload);
+          setEvents((prev) => [{ type: "telemetry_pulse", data: payload }, ...prev.slice(0, 49)]);
         } catch (err) {
-          console.error("Failed to parse sensor_reading event", err);
+          console.error("Failed to parse telemetry_pulse event", err);
         }
       });
 
-      es.addEventListener("action_event", (e: MessageEvent) => {
+      // 2. audit_action event listener
+      es.addEventListener("audit_action", (e: MessageEvent) => {
         if (!isMounted) return;
+        if (e.lastEventId) {
+          lastEventIdRef.current = e.lastEventId;
+        }
         try {
-          const payload = JSON.parse(e.data) as LiveActionEvent;
-          if (payload.source === "kafka" || payload.source === "synthetic_demo") {
-            setSource(payload.source);
+          const payload = JSON.parse(e.data) as AuditActionEvent;
+          if (payload.source) {
+            setSource(payload.source as "action_logs");
           }
-          setLatestActionEvent(payload);
-          setEvents((prev) => [{ type: "action_event", data: payload }, ...prev.slice(0, 49)]);
+          setLatestAction(payload);
+          setEvents((prev) => [{ type: "audit_action", data: payload }, ...prev.slice(0, 49)]);
         } catch (err) {
-          console.error("Failed to parse action_event event", err);
+          console.error("Failed to parse audit_action event", err);
         }
       });
 
+      // 3. heartbeat event listener
       es.addEventListener("heartbeat", (e: MessageEvent) => {
         if (!isMounted) return;
+        if (e.lastEventId) {
+          lastEventIdRef.current = e.lastEventId;
+        }
         try {
-          const payload = JSON.parse(e.data);
+          const payload = JSON.parse(e.data) as HeartbeatEvent;
+          if (payload.source) {
+            setSource(payload.source as "server");
+          }
           setLastHeartbeat(payload.timestamp || new Date().toISOString());
         } catch {
           setLastHeartbeat(new Date().toISOString());
@@ -94,7 +115,6 @@ export function useSSEStream() {
         if (!isMounted) return;
         setStatus("ERROR");
         es.close();
-        // Exponential backoff reconnect
         if (!reconnectTimerRef.current) {
           reconnectTimerRef.current = setTimeout(() => {
             reconnectTimerRef.current = null;
@@ -127,8 +147,8 @@ export function useSSEStream() {
     status,
     source,
     events,
-    latestSensorEvent,
-    latestActionEvent,
+    latestTelemetry,
+    latestAction,
     lastHeartbeat,
     clearEvents,
   };

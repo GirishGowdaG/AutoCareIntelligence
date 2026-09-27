@@ -36,7 +36,7 @@ export default function DemandForecastPage() {
             <span>Area 3: Service Demand Forecast & Capacity Horizon</span>
           </h1>
           <p className="mt-1 text-xs text-slate-400">
-            Time-series service demand volume forecasting with 95% confidence intervals and capacity surge alerts.
+            Time-series service demand volume forecasting with 80% confidence intervals and capacity surge alerts.
           </p>
         </div>
 
@@ -65,7 +65,7 @@ export default function DemandForecastPage() {
               Demand Horizon & Confidence Band
             </h2>
             <p className="text-[11px] text-slate-400">
-              Predicted service volume trajectory and 95% prediction intervals
+              Predicted service volume trajectory and 80% prediction intervals
             </p>
           </div>
           {forecasts.some((f) => f.is_surge) && (
@@ -157,8 +157,8 @@ export default function DemandForecastPage() {
                   <th className="py-3.5 px-4">Forecast Date</th>
                   <th className="py-3.5 px-4">Dealer ID</th>
                   <th className="py-3.5 px-4">Predicted Demand</th>
-                  <th className="py-3.5 px-4">Lower Bound (95%)</th>
-                  <th className="py-3.5 px-4">Upper Bound (95%)</th>
+                  <th className="py-3.5 px-4">Lower Bound (80%)</th>
+                  <th className="py-3.5 px-4">Upper Bound (80%)</th>
                   <th className="py-3.5 px-4">Surge Warning</th>
                   <th className="py-3.5 px-4">Model Version</th>
                 </tr>
@@ -167,14 +167,14 @@ export default function DemandForecastPage() {
                 {forecasts.map((f) => (
                   <tr key={f.forecast_id} className="hover:bg-slate-800/40 transition">
                     <td className="py-3 px-4 font-sans font-medium text-white">
-                      {f.forecast_date.split("T")[0]}
+                      {String(f.forecast_date).split("T")[0]}
                     </td>
                     <td className="py-3 px-4 text-slate-300 font-semibold">{f.dealer_id}</td>
                     <td className="py-3 px-4 font-bold text-blue-300">
-                      {f.predicted_demand.toFixed(1)} units
+                      {(f.predicted_volume ?? 0).toFixed(1)} units
                     </td>
-                    <td className="py-3 px-4 text-slate-400">{f.lower_bound.toFixed(1)}</td>
-                    <td className="py-3 px-4 text-slate-400">{f.upper_bound.toFixed(1)}</td>
+                    <td className="py-3 px-4 text-slate-400">{(f.lower_bound_80 ?? 0).toFixed(1)}</td>
+                    <td className="py-3 px-4 text-slate-400">{(f.upper_bound_80 ?? 0).toFixed(1)}</td>
                     <td className="py-3 px-4">
                       {f.is_surge ? (
                         <StatusBadge status="SURGE" size="sm" />

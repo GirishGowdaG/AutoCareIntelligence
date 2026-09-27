@@ -98,7 +98,7 @@ export const apiClient = {
   getServiceDemandForecast: (
     apiKey?: string | null,
     params?: { limit?: number; offset?: number; dealer_id?: string; is_surge?: boolean }
-  ) => request<PaginatedResponse<ServiceDemandForecast>>("/api/v1/forecast/service-demand", apiKey, params),
+  ) => request<PaginatedResponse<ServiceDemandForecast>>("/api/v1/forecasts/service-demand", apiKey, params),
 
   getWarrantyAnomalies: (
     apiKey?: string | null,

@@ -13,35 +13,51 @@ export interface ActionAuditRecord {
   executed_at: string;
 }
 
-export interface LiveSensorEvent {
-  vehicle_id: string;
+export interface TelemetryData {
+  vehicle_id?: string;
   rpm: number;
-  speed_kmh: number;
-  coolant_temp_c: number;
-  anomaly_score: number;
-  is_anomaly: boolean;
-  timestamp: string;
-  source: "kafka" | "synthetic_demo" | string;
+  temperature: number;
+  battery: number;
+  vibration: number;
 }
 
-export interface LiveActionEvent {
+export interface TelemetryPulseEvent {
+  event_type: "telemetry_pulse";
+  source: "kafka" | "synthetic_demo" | string;
+  timestamp: string;
+  data: TelemetryData;
+}
+
+export interface AuditActionItem {
   action_id: string;
   rule_id: string;
-  action_type: string;
   entity_type: EntityType;
   entity_id: string;
-  priority: string;
-  delivery_status: DeliveryStatus;
-  executed_at: string;
-  source: "kafka" | "synthetic_demo" | string;
+  trigger_timestamp?: string;
+  trigger_value?: number;
+  threshold_applied?: number;
+  action_taken?: string;
+  channel_dispatched?: string;
+  delivery_status?: DeliveryStatus;
+  idempotency_key?: string;
+  created_at: string;
+}
+
+export interface AuditActionEvent {
+  event_type: "audit_action";
+  source: "action_logs" | string;
+  timestamp: string;
+  action: AuditActionItem;
 }
 
 export interface HeartbeatEvent {
-  type: "heartbeat";
+  event_type: "heartbeat";
+  source: "server" | string;
   timestamp: string;
+  message_seq?: number;
 }
 
 export type SSEEventPayload =
-  | { type: "sensor_reading"; data: LiveSensorEvent }
-  | { type: "action_event"; data: LiveActionEvent }
+  | { type: "telemetry_pulse"; data: TelemetryPulseEvent }
+  | { type: "audit_action"; data: AuditActionEvent }
   | { type: "heartbeat"; data: HeartbeatEvent };

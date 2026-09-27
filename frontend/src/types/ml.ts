@@ -10,14 +10,14 @@ export interface FailureRiskPrediction {
 }
 
 export interface SensorAnomalyRecord {
+  anomaly_id: string;
   vehicle_id: string;
-  snapshot_id: string;
+  window_timestamp: string;
   anomaly_score: number;
   is_anomaly: boolean;
-  rpm: number;
-  speed_kmh: number;
-  coolant_temp_c: number;
-  timestamp: string;
+  anomalous_features?: Record<string, unknown> | null;
+  model_version: string;
+  detected_at?: string | null;
 }
 
 export interface SensorAnomaliesResponse {
@@ -32,11 +32,12 @@ export interface ServiceDemandForecast {
   forecast_id: string;
   dealer_id: string;
   forecast_date: string;
-  predicted_demand: number;
-  lower_bound: number;
-  upper_bound: number;
-  is_surge: boolean;
+  predicted_volume: number;
+  lower_bound_80: number;
+  upper_bound_80: number;
   model_version: string;
+  generated_at?: string;
+  is_surge?: boolean;
 }
 
 export interface WarrantyAnomalyRecord {

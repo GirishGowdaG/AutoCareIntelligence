@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Activity, ShieldCheck, Filter, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Activity, ShieldCheck, Filter, ChevronLeft, ChevronRight, CheckCircle2, Radio } from "lucide-react";
 import { useSensorAnomalies } from "@/hooks/usePredictions";
+import { useSSEStream } from "@/hooks/useSSEStream";
 import { ErrorBanner, SkeletonTable, EmptyState } from "@/components/common/EmptyState";
 import { LiveTelemetryGauges } from "@/components/charts/LiveTelemetryGauges";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { formatDate } from "@/lib/utils";
-import { SensorAnomalyRecord } from "@/types/ml";
+import { TelemetryData } from "@/types/audit";
 
 export default function SensorAnomaliesPage() {
   const searchParams = useSearchParams();
@@ -19,8 +20,6 @@ export default function SensorAnomaliesPage() {
   const [offset, setOffset] = useState<number>(0);
   const limit = 15;
 
-  const [selectedReading, setSelectedReading] = useState<SensorAnomalyRecord | null>(null);
-
   const { records, total, frozenThreshold, loading, error, refetch } = useSensorAnomalies({
     limit,
     offset,
@@ -28,11 +27,16 @@ export default function SensorAnomaliesPage() {
     is_anomaly: anomalyOnly ? true : undefined,
   });
 
-  useEffect(() => {
-    if (records.length > 0 && !selectedReading) {
-      setSelectedReading(records[0]);
-    }
-  }, [records, selectedReading]);
+  const { latestTelemetry, isConnected, source } = useSSEStream();
+
+  // Active CAN-bus telemetry data from live SSE stream or standard operational baseline
+  const activeTelemetry: TelemetryData = latestTelemetry?.data || {
+    vehicle_id: vehicleIdFilter || "VH001",
+    rpm: 2450,
+    temperature: 92.5,
+    battery: 13.8,
+    vibration: 1.25,
+  };
 
   const totalPages = Math.ceil(total / limit) || 1;
   const currentPage = Math.floor(offset / limit) + 1;
@@ -47,7 +51,7 @@ export default function SensorAnomaliesPage() {
             <span>Area 2: CAN-Bus Sensor Anomaly Monitor</span>
           </h1>
           <p className="mt-1 text-xs text-slate-400">
-            Unsupervised reconstruction error scoring and live telemetry threshold anomaly detection.
+            Unsupervised reconstruction error scoring and live telemetry pulse threshold surveillance.
           </p>
         </div>
 
@@ -67,31 +71,36 @@ export default function SensorAnomaliesPage() {
         </div>
       </div>
 
-      {/* Live Gauges Section */}
+      {/* Live Telemetry Gauges Section */}
       <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 space-y-3">
         <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Active CAN-Bus Reading Instrument Cluster
-            </h2>
-            <p className="text-[11px] text-slate-400">
-              Displaying sensor values for vehicle:{" "}
-              <strong className="text-white font-mono">
-                {selectedReading?.vehicle_id || "Select record below"}
-              </strong>
-            </p>
+          <div className="flex items-center gap-2">
+            <Radio className="h-4 w-4 text-blue-400 animate-pulse" />
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                Live CAN-Bus Telemetry Pulse Instrument Cluster
+              </h2>
+              <p className="text-[11px] text-slate-400">
+                Displaying real-time sensor parameters: RPM, Temperature (°C), Battery Voltage (V), and Vibration
+              </p>
+            </div>
           </div>
-          {selectedReading && (
-            <span className="text-[11px] text-slate-500 font-mono">
-              Recorded: {formatDate(selectedReading.timestamp)}
+          <div className="flex items-center gap-2 text-[11px] text-slate-400">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                isConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"
+              }`}
+            />
+            <span>
+              {source === "kafka"
+                ? "[LIVE: Kafka Telemetry]"
+                : "[DEMO MODE: Synthetic Telemetry]"}
             </span>
-          )}
+          </div>
         </div>
 
-        <LiveTelemetryGauges
-          reading={selectedReading}
-          frozenThreshold={frozenThreshold}
-        />
+        {/* 4 Approved Gauges */}
+        <LiveTelemetryGauges reading={activeTelemetry} />
       </div>
 
       {/* Filter Bar */}
@@ -147,10 +156,10 @@ export default function SensorAnomaliesPage() {
 
       {/* Data Table */}
       {loading ? (
-        <SkeletonTable rows={10} cols={7} />
+        <SkeletonTable rows={10} cols={6} />
       ) : records.length === 0 ? (
         <EmptyState
-          title="No sensor readings found"
+          title="No sensor anomaly records found"
           description="No telemetry snapshot records match the given criteria."
         />
       ) : (
@@ -160,69 +169,54 @@ export default function SensorAnomaliesPage() {
               <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 <tr>
                   <th className="py-3.5 px-4">Vehicle ID</th>
-                  <th className="py-3.5 px-4">Timestamp</th>
+                  <th className="py-3.5 px-4">Window Timestamp</th>
                   <th className="py-3.5 px-4">Anomaly Score</th>
                   <th className="py-3.5 px-4">Classification</th>
-                  <th className="py-3.5 px-4">Engine RPM</th>
-                  <th className="py-3.5 px-4">Speed (km/h)</th>
-                  <th className="py-3.5 px-4">Coolant Temp</th>
-                  <th className="py-3.5 px-4 text-right">Gauges</th>
+                  <th className="py-3.5 px-4">Frozen Calibration Target</th>
+                  <th className="py-3.5 px-4">Model Version</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
-                {records.map((r) => {
-                  const isSelected = selectedReading?.snapshot_id === r.snapshot_id;
-                  return (
-                    <tr
-                      key={r.snapshot_id}
-                      onClick={() => setSelectedReading(r)}
-                      className={`cursor-pointer transition ${
-                        isSelected
-                          ? "bg-blue-950/40 border-l-2 border-blue-500"
-                          : "hover:bg-slate-800/40"
-                      }`}
-                    >
-                      <td className="py-3 px-4 font-semibold text-white">
-                        {r.vehicle_id}
-                      </td>
-                      <td className="py-3 px-4 font-sans text-slate-400">
-                        {formatDate(r.timestamp)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`font-bold ${
-                            r.is_anomaly ? "text-rose-400" : "text-slate-200"
-                          }`}
-                        >
-                          {r.anomaly_score.toFixed(6)}
+                {records.map((r) => (
+                  <tr key={r.anomaly_id} className="hover:bg-slate-800/40 transition">
+                    <td className="py-3 px-4 font-semibold text-white">
+                      {r.vehicle_id}
+                    </td>
+                    <td className="py-3 px-4 font-sans text-slate-400">
+                      {formatDate(r.window_timestamp || r.detected_at)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`font-bold ${
+                          r.is_anomaly ? "text-rose-400" : "text-slate-200"
+                        }`}
+                      >
+                        {r.anomaly_score.toFixed(6)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {r.is_anomaly ? (
+                        <StatusBadge status="ANOMALY" size="sm" />
+                      ) : (
+                        <StatusBadge status="NORMAL" size="sm" />
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-slate-400 text-xs">
+                      {frozenThreshold !== null ? (
+                        <span>
+                          {r.anomaly_score > frozenThreshold ? (
+                            <span className="text-rose-400 font-semibold">&gt; {frozenThreshold.toFixed(6)}</span>
+                          ) : (
+                            <span className="text-emerald-400 font-semibold">&le; {frozenThreshold.toFixed(6)}</span>
+                          )}
                         </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        {r.is_anomaly ? (
-                          <StatusBadge status="ANOMALY" size="sm" />
-                        ) : (
-                          <StatusBadge status="NORMAL" size="sm" />
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-slate-300">{r.rpm}</td>
-                      <td className="py-3 px-4 text-slate-300">{r.speed_kmh.toFixed(1)}</td>
-                      <td className="py-3 px-4 text-slate-300">{r.coolant_temp_c.toFixed(1)}°C</td>
-                      <td className="py-3 px-4 text-right font-sans">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedReading(r);
-                          }}
-                          className={`text-xs font-semibold ${
-                            isSelected ? "text-blue-300" : "text-slate-400 hover:text-white"
-                          }`}
-                        >
-                          {isSelected ? "Active" : "Inspect"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-slate-500 font-sans">{r.model_version}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -230,7 +224,7 @@ export default function SensorAnomaliesPage() {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-slate-800 px-4 py-3 bg-slate-950/60 text-xs text-slate-400">
             <div>
-              Showing {total > 0 ? offset + 1 : 0} to {Math.min(offset + limit, total)} of {total} readings
+              Showing {total > 0 ? offset + 1 : 0} to {Math.min(offset + limit, total)} of {total} records
             </div>
             <div className="flex items-center gap-2">
               <button
