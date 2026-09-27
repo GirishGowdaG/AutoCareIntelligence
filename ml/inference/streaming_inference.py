@@ -27,11 +27,15 @@ class StreamingSensorScorer:
             if model_path.exists():
                 self.model.load(model_path)
 
-    def score_event(self, event: Dict[str, Any], anomaly_threshold: float = 0.60) -> Dict[str, Any]:
+    def score_event(self, event: Dict[str, Any], anomaly_threshold: Optional[float] = None) -> Dict[str, Any]:
         """Score an individual streaming telemetry event in real time.
         
         Requires verified sensor attributes: rpm, temperature, battery, vibration.
+        Measures model algorithmic execution duration.
         """
+        import time
+        t_start = time.perf_counter()
+
         rpm = float(event.get("rpm", 0.0))
         temp = float(event.get("temperature", 0.0))
         battery = float(event.get("battery", 0.0))
@@ -54,13 +58,17 @@ class StreamingSensorScorer:
             "vibration_per_rpm_ratio": vib_ratio,
         }])
 
+        thresh = self.model.calibrated_threshold if anomaly_threshold is None else anomaly_threshold
+
         if self.model.is_fitted:
             score = float(self.model.score_samples(df_features)[0])
-            is_anomaly = score >= anomaly_threshold
+            is_anomaly = score >= thresh
         else:
             # Fallback heuristic if model not yet fitted
             score = 0.1
             is_anomaly = False
+
+        duration_ms = (time.perf_counter() - t_start) * 1000.0
 
         anomalous_features = {}
         if is_anomaly:
@@ -74,7 +82,10 @@ class StreamingSensorScorer:
             "window_timestamp": event.get("timestamp", datetime.now(timezone.utc).isoformat()),
             "anomaly_score": round(score, 4),
             "is_anomaly": is_anomaly,
+            "decision_threshold": round(float(thresh), 4),
             "anomalous_features": anomalous_features,
+            "algorithmic_latency_ms": round(duration_ms, 3),
             "model_version": self.model.model_version,
             "inference_mode": "STREAMING_REALTIME",
         }
+

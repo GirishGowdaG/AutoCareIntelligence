@@ -2,7 +2,7 @@
   "model_id": "service_demand_forecast_rf",
   "model_version": "v1.0.0",
   "trained_at": "2026-09-27",
-  "training_git_commit": "a7fc266",
+  "training_git_commit": "b454b84",
   "training_data_sha256": "ccd2fadda97e100f39a8e72c5cc402a05e6be7c1fd15c1c827dc86213182c9fc",
   "feature_names": [
     "service_count_lag_7d",
@@ -16,6 +16,10 @@
     "max_depth": 5,
     "random_state": 42
   },
+  "sample_sizes": {
+    "train_dealer_days": 115,
+    "test_dealer_days": 35
+  },
   "metrics": {
     "train": {
       "wape": 0.9945,
@@ -26,8 +30,19 @@
       "wape": 1.4982,
       "mae": 0.4281,
       "rmse": 0.5445
-    }
+    },
+    "naive_baseline_mae": 0.5143,
+    "relative_lift": 0.1676
+  },
+  "acceptance_status": {
+    "candidate_mae": 0.4281,
+    "mae_threshold": 0.6,
+    "mae_pass": true,
+    "relative_lift": 0.16758333300747683,
+    "lift_threshold": 0.1,
+    "lift_pass": true,
+    "overall_pass": true
   },
   "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\demand_forecast\\v1.0.0\\model.joblib",
-  "serialized_at": "2026-09-27T05:12:08.846644+00:00"
+  "serialized_at": "2026-09-27T06:29:16.776918+00:00"
 }

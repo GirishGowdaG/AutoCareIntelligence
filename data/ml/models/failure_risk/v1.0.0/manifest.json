@@ -2,8 +2,8 @@
   "model_id": "vehicle_failure_risk_rf",
   "model_version": "v1.0.0",
   "trained_at": "2026-09-27",
-  "training_git_commit": "a7fc266",
-  "training_data_sha256": "6b69f6a23fa72cc3bb1395b7581c7f7b6fd5fdf330f8a0ad45f397f7c2898634",
+  "training_git_commit": "b454b84",
+  "training_data_sha256": "4000d4659409654f4ef97378722333e90717b8b6722328604ab7bbcdac6a3380",
   "feature_names": [
     "telemetry_avg_engine_temp_30d",
     "telemetry_max_engine_temp_7d",
@@ -19,29 +19,70 @@
     "max_depth": 4,
     "random_state": 42
   },
+  "evaluation_framework": "Pooled Repeated-Cutoff Point-in-Time Evaluation with documented temporal target overlap and repeated-vehicle dependence.",
+  "data_limitation_note": "The 29-day dataset cannot provide a conventional non-overlapping temporal embargo for a 7-day lookback + 14-day horizon. Training target windows overlap evaluation calendar periods.",
+  "sample_sizes": {
+    "train_observations": 300,
+    "eval_observations": 150,
+    "train_cutoffs": [
+      "2026-09-03",
+      "2026-09-04",
+      "2026-09-05",
+      "2026-09-06",
+      "2026-09-07",
+      "2026-09-08"
+    ],
+    "eval_cutoffs": [
+      "2026-09-09",
+      "2026-09-10",
+      "2026-09-11"
+    ]
+  },
   "metrics": {
     "train": {
-      "pr_auc": 1.0,
-      "roc_auc": 1.0,
-      "brier_score": 0.0039,
-      "precision": 1.0,
-      "recall": 1.0
+      "pr_auc": 0.9998,
+      "roc_auc": 0.9974,
+      "brier_score": 0.0269,
+      "precision": 0.9964,
+      "recall": 0.9894
     },
-    "val": {
-      "pr_auc": 0.9354,
-      "roc_auc": 0.5733,
-      "brier_score": 0.1004,
-      "precision": 0.9149,
-      "recall": 0.9556
+    "pooled_eval": {
+      "pr_auc": 0.9761,
+      "roc_auc": 0.8452,
+      "brier_score": 0.0812,
+      "precision": 0.9028,
+      "recall": 0.9774
     },
-    "test": {
-      "pr_auc": 0.958,
-      "roc_auc": 0.6933,
-      "brier_score": 0.1,
-      "precision": 0.898,
-      "recall": 0.9778
+    "per_cutoff_eval": {
+      "2026-09-09": {
+        "pr_auc": 0.98,
+        "roc_auc": 0.8636,
+        "brier_score": 0.0858,
+        "precision": 0.8958,
+        "recall": 0.9773
+      },
+      "2026-09-10": {
+        "pr_auc": 0.9694,
+        "roc_auc": 0.8182,
+        "brier_score": 0.0861,
+        "precision": 0.8958,
+        "recall": 0.9773
+      },
+      "2026-09-11": {
+        "pr_auc": 0.9772,
+        "roc_auc": 0.8444,
+        "brier_score": 0.0717,
+        "precision": 0.9167,
+        "recall": 0.9778
+      }
     }
   },
+  "acceptance_status": {
+    "roc_auc_pass": true,
+    "pr_auc_pass": true,
+    "brier_pass": true,
+    "overall_pass": true
+  },
   "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\failure_risk\\v1.0.0\\model.joblib",
-  "serialized_at": "2026-09-27T05:11:38.966419+00:00"
+  "serialized_at": "2026-09-27T06:28:16.853938+00:00"
 }

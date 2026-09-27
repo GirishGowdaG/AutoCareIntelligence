@@ -87,3 +87,29 @@ MODEL_VERSIONS: Dict[str, str] = {
     "demand_forecast": "v1.0.0",
     "warranty_anomaly": "v1.0.0",
 }
+
+# Ratified Acceptance Criteria & Operational Parameters
+# Area 1: Failure Risk (Pooled repeated-cutoff evaluation)
+FAILURE_RISK_POOLED_CUTOFFS: List[str] = [
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+]
+FAILURE_RISK_ROC_AUC_THRESHOLD: float = 0.70
+FAILURE_RISK_PR_AUC_THRESHOLD: float = 0.35
+FAILURE_RISK_BRIER_THRESHOLD: float = 0.15
+
+# Area 2: Sensor Anomaly (Empirical min-max normalization & calibration)
+SENSOR_NOMINAL_FPR_TARGET: float = 0.02
+SENSOR_ALGO_LATENCY_TARGET_MS: float = 10.0      # Engineering measurement target
+SENSOR_PIPELINE_LATENCY_TARGET_MS: float = 100.0  # Engineering measurement target
+
+# Area 3: Service Demand Forecasting (Daily MAE & Lift)
+DEMAND_MAE_THRESHOLD: float = 0.60
+DEMAND_MIN_IMPROVEMENT_PCT: float = 0.10
+
+# Area 4: Warranty Outlier Ranking (Unsupervised)
+WARRANTY_SCOPE_NAME: str = "Unsupervised Warranty Outlier Ranking for Audit Prioritization"
+WARRANTY_RANK_NORMALIZATION: bool = True
+WARRANTY_TRIAGE_THRESHOLD_PROPOSED: float = 0.80  # Proposed initial threshold — not yet approved
+

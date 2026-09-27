@@ -14,6 +14,8 @@ from ml.config import (
     ML_DATASETS_DIR,
     MODEL_VERSIONS,
     RANDOM_SEED,
+    WARRANTY_SCOPE_NAME,
+    WARRANTY_TRIAGE_THRESHOLD_PROPOSED,
 )
 from ml.data.feature_extractor import FeatureExtractor
 from ml.models.base_model import compute_df_sha256
@@ -25,6 +27,12 @@ logger = logging.getLogger(__name__)
 
 
 def run_training() -> WarrantyAnomalyModel:
+    """Execute Unsupervised Warranty Claim Outlier Ranking Pipeline (Area 4).
+    
+    Fits Isolation Forest on verified warranty attributes (N=10 claims).
+    Outputs empirical percentile ranks in [0.0, 1.0].
+    Strictly unsupervised: zero fraud detection or classification claims.
+    """
     extractor = FeatureExtractor(pg_config=PG_CONFIG)
 
     logger.info("Extracting approved warranty claim records...")
@@ -53,16 +61,30 @@ def run_training() -> WarrantyAnomalyModel:
     model.fit(df[feature_cols])
 
     metrics = model.evaluate(df[feature_cols])
-    logger.info(f"Actual Warranty Anomaly Evaluation Metrics: {metrics}")
+    logger.info(f"Actual Warranty Outlier Ranking Evaluation Metrics: {metrics}")
+
+    # Compute individual claim ranks for logging
+    ranks = model.score_samples(df[feature_cols])
+    for idx, row in df.iterrows():
+        logger.info(f"  Claim ID {row['claim_id']}: Percentile Rank = {ranks[idx]:.4f} (Amount=${row['claim_amount']:.2f})")
 
     metadata = {
         "model_id": model.model_id,
         "model_version": model.model_version,
         "trained_at": date.today().isoformat(),
-        "training_git_commit": "a7fc266",
+        "training_git_commit": "b454b84",
         "training_data_sha256": data_sha,
+        "scope": WARRANTY_SCOPE_NAME,
+        "fraud_disclaimer": "Strictly unsupervised outlier ranking for audit prioritization. Zero claims of fraud detection, fraud classification, or abuse identification.",
         "feature_names": feature_cols,
-        "hyperparameters": {"contamination": 0.02, "n_estimators": 100, "random_state": RANDOM_SEED},
+        "hyperparameters": {
+            "contamination": 0.02,
+            "n_estimators": 100,
+            "random_state": RANDOM_SEED,
+            "scaling": "Empirical Percentile Rank [0.0, 1.0]",
+            "exploratory_triage_threshold": WARRANTY_TRIAGE_THRESHOLD_PROPOSED,
+        },
+        "sample_size": len(df),
         "metrics": metrics,
     }
     model.metadata = metadata
@@ -78,3 +100,4 @@ def run_training() -> WarrantyAnomalyModel:
 
 if __name__ == "__main__":
     run_training()
+

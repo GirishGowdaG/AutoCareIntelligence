@@ -83,7 +83,7 @@ class BatchInferenceRunner:
 
         X = df[model.feature_names]
         scores = model.score_samples(X)
-        is_anom = model.predict(X, threshold=0.60)
+        is_anom = model.predict(X)
 
         records = []
         for i, row in df.iterrows():
@@ -178,7 +178,8 @@ class BatchInferenceRunner:
                 "outlier_reasons": {
                     "median_ratio": float(row.get("claim_amount_to_component_median_ratio", 1.0)),
                     "iqr_distance": float(row.get("component_claim_iqr_distance", 0.0)),
-                } if score >= 0.65 else {},
+                } if score >= 0.80 else {},
             })
 
         return self.writer.write_warranty_anomalies(records, model_version=model.model_version)
+

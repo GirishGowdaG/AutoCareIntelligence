@@ -51,24 +51,39 @@ class TestMLModels:
         np.testing.assert_allclose(probs, loaded_probs)
 
     def test_sensor_anomaly_scorer(self):
-        X = pd.DataFrame({
-            "rpm": [2000.0, 2200.0, 2100.0, 8500.0],
-            "temperature": [85.0, 86.0, 84.0, 135.0],
-            "battery": [95.0, 94.0, 95.0, 20.0],
-            "vibration": [0.8, 0.9, 0.8, 8.5],
+        X_train = pd.DataFrame({
+            "rpm": [2000.0, 2200.0, 2100.0, 2300.0, 2050.0],
+            "temperature": [85.0, 86.0, 84.0, 85.5, 84.5],
+            "battery": [95.0, 94.0, 95.0, 94.5, 95.0],
+            "vibration": [0.8, 0.9, 0.8, 0.85, 0.82],
         })
-        model = SensorAnomalyModel(n_estimators=20, contamination=0.25)
-        model.fit(X)
+        model = SensorAnomalyModel(n_estimators=20, contamination=0.05)
+        model.fit(X_train)
 
-        scores = model.score_samples(X)
-        assert len(scores) == len(X)
-        # Severe outlier row index 3 should have higher anomaly score than row 0
-        assert scores[3] >= scores[0]
+        # Calibrate on nominal validation
+        thresh = model.calibrate_threshold(X_train, target_fpr=0.05)
+        assert 0.0 <= thresh <= 1.0
+
+        scores = model.score_samples(X_train)
+        assert len(scores) == len(X_train)
+        assert all(0.0 <= s <= 1.0 for s in scores)
+
+        # Severe outlier should score high
+        X_outlier = pd.DataFrame({
+            "rpm": [9500.0],
+            "temperature": [145.0],
+            "battery": [15.0],
+            "vibration": [9.5],
+        })
+        outlier_score = model.score_samples(X_outlier)[0]
+        assert outlier_score >= scores[0]
 
         # Streaming scorer integration
         scorer = StreamingSensorScorer(model=model)
-        res = scorer.score_event({"rpm": 8500, "temperature": 135, "battery": 20, "vibration": 8.5})
+        res = scorer.score_event({"rpm": 9500, "temperature": 145, "battery": 15, "vibration": 9.5})
         assert "anomaly_score" in res
+        assert "algorithmic_latency_ms" in res
+        assert res["algorithmic_latency_ms"] < 50.0  # Engineering measurement target (< 10ms typical)
         assert res["inference_mode"] == "STREAMING_REALTIME"
 
     def test_demand_forecast_model(self):
@@ -90,6 +105,7 @@ class TestMLModels:
         metrics = model.evaluate(X, y)
         assert "wape" in metrics
         assert "mae" in metrics
+        assert metrics["mae"] >= 0.0
 
     def test_warranty_anomaly_model(self):
         X = pd.DataFrame({
@@ -102,7 +118,11 @@ class TestMLModels:
 
         scores = model.score_samples(X)
         assert len(scores) == len(X)
-        assert scores[3] >= scores[0]
+        # Percentile rank scaling: min is 0.0, max is 1.0
+        assert np.isclose(np.min(scores), 0.0)
+        assert np.isclose(np.max(scores), 1.0)
+        assert scores[3] > scores[0]
+
 
     def test_drift_detector_psi_and_ks(self):
         rng = np.random.default_rng(42)

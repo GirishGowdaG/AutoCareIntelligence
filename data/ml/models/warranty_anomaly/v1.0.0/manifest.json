@@ -2,8 +2,10 @@
   "model_id": "warranty_anomaly_iforest",
   "model_version": "v1.0.0",
   "trained_at": "2026-09-27",
-  "training_git_commit": "a7fc266",
+  "training_git_commit": "b454b84",
   "training_data_sha256": "b1175de38604ac702012baf2993afaf7223ab53548f9d560e179b15a1120ad4c",
+  "scope": "Unsupervised Warranty Outlier Ranking for Audit Prioritization",
+  "fraud_disclaimer": "Strictly unsupervised outlier ranking for audit prioritization. Zero claims of fraud detection, fraud classification, or abuse identification.",
   "feature_names": [
     "claim_amount",
     "claim_amount_to_component_median_ratio",
@@ -13,14 +15,19 @@
   "hyperparameters": {
     "contamination": 0.02,
     "n_estimators": 100,
-    "random_state": 42
+    "random_state": 42,
+    "scaling": "Empirical Percentile Rank [0.0, 1.0]",
+    "exploratory_triage_threshold": 0.8
   },
+  "sample_size": 10,
   "metrics": {
-    "mean_anomaly_score": 0.927,
-    "median_anomaly_score": 0.926,
-    "max_anomaly_score": 0.945,
-    "outlier_rate": 1.0
+    "mean_anomaly_score": 0.5,
+    "median_anomaly_score": 0.5,
+    "max_anomaly_score": 1.0,
+    "min_anomaly_score": 0.0,
+    "outlier_triage_count": 2,
+    "outlier_triage_rate": 0.2
   },
   "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\warranty_anomaly\\v1.0.0\\model.joblib",
-  "serialized_at": "2026-09-27T05:12:47.493036+00:00"
+  "serialized_at": "2026-09-27T06:29:26.464151+00:00"
 }

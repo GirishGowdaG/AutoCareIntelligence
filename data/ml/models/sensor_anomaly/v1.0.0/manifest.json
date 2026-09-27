@@ -2,8 +2,8 @@
   "model_id": "sensor_anomaly_iforest",
   "model_version": "v1.0.0",
   "trained_at": "2026-09-27",
-  "training_git_commit": "a7fc266",
-  "training_data_sha256": "f2613ce7ca1059dae00c4bd7232c291d2a0f970935e0deb41cc2131c076f22da",
+  "training_git_commit": "b454b84",
+  "training_data_sha256": "3b58964dd03de3d32af659a5847f06b57d8ebd23bde5c280e9d5b757a3244444",
   "feature_names": [
     "rpm",
     "temperature",
@@ -17,22 +17,58 @@
   "hyperparameters": {
     "contamination": 0.02,
     "n_estimators": 100,
-    "random_state": 42
+    "random_state": 42,
+    "normalization": "Empirical Min-Max Normalization fitted on nominal train",
+    "min_raw_score": -0.699535822685443,
+    "max_raw_score": -0.3909504364823622,
+    "calibrated_threshold": 0.8140131418948856
+  },
+  "latency_targets": {
+    "algorithmic_latency_target_ms": 10.0,
+    "pipeline_latency_target_ms": 100.0,
+    "note": "Engineering measurement targets \u2014 NOT assignment-mandated acceptance requirements."
+  },
+  "sample_sizes": {
+    "nominal_train": 3868,
+    "nominal_validation": 829,
+    "nominal_held_out_test": 830,
+    "excised_fault_pings": 2027
   },
   "metrics": {
     "nominal_train": {
-      "mean_anomaly_score": 0.9085,
-      "median_anomaly_score": 0.9036,
-      "max_anomaly_score": 0.9728,
-      "detected_anomaly_rate": 1.0
+      "mean_anomaly_score": 0.2476,
+      "median_anomaly_score": 0.1888,
+      "max_anomaly_score": 1.0,
+      "detected_anomaly_rate": 0.0243,
+      "decision_threshold": 0.814
+    },
+    "nominal_validation": {
+      "mean_anomaly_score": 0.2541,
+      "median_anomaly_score": 0.198,
+      "max_anomaly_score": 0.9462,
+      "detected_anomaly_rate": 0.0205,
+      "decision_threshold": 0.814
+    },
+    "nominal_held_out_test": {
+      "mean_anomaly_score": 0.2472,
+      "median_anomaly_score": 0.1866,
+      "max_anomaly_score": 1.0,
+      "detected_anomaly_rate": 0.0265,
+      "decision_threshold": 0.814
     },
     "fault_eval": {
-      "mean_anomaly_score": 0.937,
-      "median_anomaly_score": 0.9485,
-      "max_anomaly_score": 0.9748,
-      "detected_anomaly_rate": 1.0
+      "mean_anomaly_score": 0.5311,
+      "median_anomaly_score": 0.6234,
+      "max_anomaly_score": 1.0,
+      "detected_anomaly_rate": 0.0863,
+      "decision_threshold": 0.814
     }
   },
+  "acceptance_status": {
+    "empirical_held_out_fpr": 0.0265,
+    "target_fpr": 0.02,
+    "fpr_pass": false
+  },
   "artifact_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\ml\\models\\sensor_anomaly\\v1.0.0\\model.joblib",
-  "serialized_at": "2026-09-27T05:11:59.919894+00:00"
+  "serialized_at": "2026-09-27T06:29:04.988641+00:00"
 }
