@@ -1,0 +1,77 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-09-27T04:26:02.219157+00:00",
+  "total_files_tracked": 10,
+  "files": {
+    "raw/components.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\components.csv",
+      "file_size": 567,
+      "sha256": "c5415f69b94a44597216b87666d139854ee300eeb805a522350184bb3c674384",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.068106+00:00"
+    },
+    "raw/customers.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\customers.csv",
+      "file_size": 2058,
+      "sha256": "e194c7bc248cd43078519dd08d7791305ca3445134fa54aed770b0f4060807d6",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.091137+00:00"
+    },
+    "raw/dealers.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\dealers.csv",
+      "file_size": 263,
+      "sha256": "48d53c13fa804e65b37b6ade44da0ad193e06360da435256413d98adf9dcfb98",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.097060+00:00"
+    },
+    "raw/diagnostics.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\diagnostics.csv",
+      "file_size": 81226,
+      "sha256": "295faec46a2b7209807dc9c20aa999dd0ef5f23b447cf85cad5b3b514f0d781b",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.132624+00:00"
+    },
+    "raw/parts.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\parts.csv",
+      "file_size": 1031,
+      "sha256": "626b114e8cfde762795b2fb16d0c5760ba159bb34788ef32846eb95ec9a14c6e",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.143275+00:00"
+    },
+    "raw/service.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\service.csv",
+      "file_size": 4419,
+      "sha256": "9009542cee726d3b779184e1a68776ad856b27dcd67c3d126dc6a20ce1928362",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.159673+00:00"
+    },
+    "raw/telemetry.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\telemetry.csv",
+      "file_size": 398598,
+      "sha256": "c3712bd86f6010f24c2e353cd18deee9d507200dffde8c1e599e00f6cc6f9d2d",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.172843+00:00"
+    },
+    "raw/vehicles.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\vehicles.csv",
+      "file_size": 2225,
+      "sha256": "de7b1ecf75d4623eadeac90cac4bd6fb6f07e16db8c7a1368b319fbcea1f13d0",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.192888+00:00"
+    },
+    "raw/vehicle_customer_map.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\vehicle_customer_map.csv",
+      "file_size": 1642,
+      "sha256": "73a40c168e415c23ae16d8ea3582ba33d1edb7a6c39a654c89a2214786d778e6",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.213756+00:00"
+    },
+    "raw/warranty.csv": {
+      "source_path": "D:\\class\\Project\\AutoCareIntelligence\\data\\raw\\warranty.csv",
+      "file_size": 694,
+      "sha256": "0e04e5f2fea50856b938be8495f1dc6df8a6a59e3b8fa3475fd2555cf915e23a",
+      "ingestion_batch_id": "phase_2a_historical",
+      "processed_at": "2026-09-27T04:26:02.219157+00:00"
+    }
+  }
+}
