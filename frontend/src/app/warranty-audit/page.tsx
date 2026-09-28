@@ -8,7 +8,7 @@ import { useAuthRole } from "@/hooks/useAuthRole";
 import { ErrorBanner, SkeletonTable, EmptyState } from "@/components/common/EmptyState";
 import { ForbiddenView } from "@/components/common/ForbiddenView";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function WarrantyAuditPage() {
   const searchParams = useSearchParams();
@@ -138,7 +138,7 @@ export default function WarrantyAuditPage() {
 
       {/* Data Table */}
       {loading ? (
-        <SkeletonTable rows={10} cols={8} />
+        <SkeletonTable rows={10} cols={7} />
       ) : filteredRecords.length === 0 ? (
         <EmptyState
           title="No flagged warranty claims"
@@ -152,18 +152,20 @@ export default function WarrantyAuditPage() {
                 <tr>
                   <th className="py-3.5 px-4">Claim ID</th>
                   <th className="py-3.5 px-4">Dealer ID</th>
-                  <th className="py-3.5 px-4">Vehicle ID</th>
+                  <th className="py-3.5 px-4">Component</th>
                   <th className="py-3.5 px-4">Anomaly Score</th>
                   <th className="py-3.5 px-4">Claim Total</th>
-                  <th className="py-3.5 px-4">Labor Hours</th>
-                  <th className="py-3.5 px-4">Parts Cost</th>
-                  <th className="py-3.5 px-4">Labor Cost</th>
-                  <th className="py-3.5 px-4 text-center">Audit Status</th>
+                  <th className="py-3.5 px-4">Outlier Reason</th>
+                  <th className="py-3.5 px-4">Flagged At</th>
+                  <th className="py-3.5 px-4 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
                 {filteredRecords.map((c) => {
                   const isHighlighted = targetClaimId && c.claim_id === targetClaimId;
+                  const reason = c.outlier_reasons && c.outlier_reasons.length > 0
+                    ? c.outlier_reasons.join(", ")
+                    : "Statistical Outlier";
                   return (
                     <tr
                       key={c.claim_id}
@@ -181,33 +183,24 @@ export default function WarrantyAuditPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-semibold text-slate-300">{c.dealer_id}</td>
-                      <td className="py-3 px-4 text-slate-300">{c.vehicle_id}</td>
+                      <td className="py-3 px-4 font-semibold text-slate-300">{c.dealer_id || "—"}</td>
+                      <td className="py-3 px-4 text-slate-300 font-sans">{c.component_id || "General System"}</td>
                       <td className="py-3 px-4">
-                        <span
-                          className={`font-bold ${
-                            c.is_outlier ? "text-rose-400" : "text-slate-300"
-                          }`}
-                        >
-                          {c.anomaly_score.toFixed(4)}
+                        <span className="font-bold text-rose-400">
+                          {c.anomaly_score !== undefined ? c.anomaly_score.toFixed(4) : "—"}
                         </span>
                       </td>
                       <td className="py-3 px-4 font-bold text-white font-sans">
                         {formatCurrency(c.claim_amount)}
                       </td>
-                      <td className="py-3 px-4 text-slate-300">{c.labor_hours.toFixed(1)} hrs</td>
-                      <td className="py-3 px-4 font-sans text-slate-400">
-                        {formatCurrency(c.parts_cost)}
+                      <td className="py-3 px-4 font-sans text-slate-300 max-w-xs truncate" title={reason}>
+                        {reason}
                       </td>
                       <td className="py-3 px-4 font-sans text-slate-400">
-                        {formatCurrency(c.labor_cost)}
+                        {formatDate(c.flagged_at)}
                       </td>
                       <td className="py-3 px-4 text-center font-sans">
-                        {c.audit_recommended ? (
-                          <StatusBadge status="AUDIT REQUIRED" size="sm" />
-                        ) : (
-                          <StatusBadge status="NORMAL" size="sm" />
-                        )}
+                        <StatusBadge status="OUTLIER" size="sm" />
                       </td>
                     </tr>
                   );

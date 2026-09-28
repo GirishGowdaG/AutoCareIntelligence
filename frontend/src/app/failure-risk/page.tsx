@@ -78,7 +78,7 @@ export default function FailureRiskPage() {
         ))}
 
         <div className="ml-auto text-xs text-slate-400">
-          Showing <strong className="text-white font-mono">{total}</strong> prioritized assets
+          Showing <strong className="text-white font-mono">{total}</strong> predictions across 50 active fleet assets
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export default function FailureRiskPage() {
 
       {/* Data Table */}
       {loading ? (
-        <SkeletonTable rows={10} cols={6} />
+        <SkeletonTable rows={10} cols={7} />
       ) : predictions.length === 0 ? (
         <EmptyState
           title="No predictions found"
@@ -100,19 +100,25 @@ export default function FailureRiskPage() {
               <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 <tr>
                   <th className="py-3.5 px-4">Vehicle ID</th>
-                  <th className="py-3.5 px-4">Failure Probability</th>
+                  <th className="py-3.5 px-4">Failure Risk Score</th>
                   <th className="py-3.5 px-4">Risk Tier</th>
-                  <th className="py-3.5 px-4">Predicted Component</th>
-                  <th className="py-3.5 px-4">Prediction Time</th>
+                  <th className="py-3.5 px-4">Primary Risk Driver</th>
+                  <th className="py-3.5 px-4">Cutoff Horizon</th>
                   <th className="py-3.5 px-4">Model Version</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
                 {predictions.map((p) => {
-                  const probPct = (p.failure_probability * 100).toFixed(1);
+                  const score = p.risk_score ?? 0;
+                  const probPct = (score * 100).toFixed(1);
+                  const primaryDriver = p.top_features && Object.keys(p.top_features).length > 0
+                    ? Object.keys(p.top_features)[0].replace(/_/g, " ")
+                    : "General Fleet Risk";
+                  const rowKey = p.prediction_id || `${p.vehicle_id}-${p.cutoff_date || ""}`;
+
                   return (
-                    <tr key={p.vehicle_id} className="hover:bg-slate-800/40 transition">
+                    <tr key={rowKey} className="hover:bg-slate-800/40 transition">
                       <td className="py-3 px-4 font-semibold text-white">
                         {p.vehicle_id}
                       </td>
@@ -127,7 +133,7 @@ export default function FailureRiskPage() {
                                   ? "bg-amber-500"
                                   : "bg-blue-500"
                               }`}
-                              style={{ width: `${Math.min(p.failure_probability * 100, 100)}%` }}
+                              style={{ width: `${Math.min(score * 100, 100)}%` }}
                             />
                           </div>
                           <span className="font-bold text-slate-100">{probPct}%</span>
@@ -136,11 +142,11 @@ export default function FailureRiskPage() {
                       <td className="py-3 px-4">
                         <StatusBadge status={p.risk_tier} size="sm" />
                       </td>
-                      <td className="py-3 px-4 font-sans font-medium text-slate-200">
-                        {p.predicted_component}
+                      <td className="py-3 px-4 font-sans font-medium text-slate-200 capitalize">
+                        {primaryDriver}
                       </td>
                       <td className="py-3 px-4 font-sans text-slate-400">
-                        {formatDate(p.prediction_timestamp)}
+                        {formatDate(p.cutoff_date || p.created_at)}
                       </td>
                       <td className="py-3 px-4 text-slate-500">
                         {p.model_version}

@@ -13,11 +13,10 @@ export interface HealthResponse {
 export interface OverviewMetricsResponse {
   total_vehicles: number;
   critical_risk_vehicles: number;
-  active_sensor_anomalies: number;
-  surge_demand_regions: number;
-  flagged_warranty_claims: number;
-  recent_actions_count: number;
-  timestamp: string;
+  sensor_anomalies_detected: number;
+  warranty_outliers_flagged: number;
+  actions_logged_total: number;
+  last_action_timestamp?: string | null;
 }
 
 export interface PaginatedResponse<T> {

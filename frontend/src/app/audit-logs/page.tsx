@@ -131,12 +131,12 @@ export default function AuditLogsPage() {
             <table className="w-full text-left text-xs">
               <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                 <tr>
-                  <th className="py-3.5 px-4">Executed At</th>
+                  <th className="py-3.5 px-4">Trigger Timestamp</th>
                   <th className="py-3.5 px-4">Action ID</th>
                   <th className="py-3.5 px-4">Rule ID</th>
                   <th className="py-3.5 px-4">Target Entity</th>
-                  <th className="py-3.5 px-4">Action Type</th>
-                  <th className="py-3.5 px-4">Priority</th>
+                  <th className="py-3.5 px-4">Action Taken</th>
+                  <th className="py-3.5 px-4">Channel</th>
                   <th className="py-3.5 px-4 text-center">Delivery Status</th>
                 </tr>
               </thead>
@@ -144,7 +144,7 @@ export default function AuditLogsPage() {
                 {logs.map((log) => (
                   <tr key={log.action_id} className="hover:bg-slate-800/40 transition">
                     <td className="py-3 px-4 font-sans text-slate-400">
-                      {formatDate(log.executed_at)}
+                      {formatDate(log.trigger_timestamp || log.created_at)}
                     </td>
                     <td className="py-3 px-4 text-white font-semibold">{log.action_id}</td>
                     <td className="py-3 px-4 text-blue-300 font-semibold">{log.rule_id}</td>
@@ -154,9 +154,11 @@ export default function AuditLogsPage() {
                       </span>
                       {log.entity_id}
                     </td>
-                    <td className="py-3 px-4 font-sans text-slate-300">{log.action_type}</td>
-                    <td className="py-3 px-4">
-                      <StatusBadge status={log.priority} size="sm" />
+                    <td className="py-3 px-4 font-sans text-slate-200">{log.action_taken}</td>
+                    <td className="py-3 px-4 font-sans text-slate-400">
+                      <span className="rounded bg-slate-800/80 px-2 py-0.5 text-[11px] font-mono text-slate-300 border border-slate-700">
+                        {log.channel_dispatched}
+                      </span>
                     </td>
                     <td className="py-3 px-4 text-center font-sans">
                       <StatusBadge status={log.delivery_status} size="sm" />

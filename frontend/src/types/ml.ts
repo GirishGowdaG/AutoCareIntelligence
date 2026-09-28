@@ -1,12 +1,14 @@
 export type RiskTier = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
 
 export interface FailureRiskPrediction {
+  prediction_id?: string;
   vehicle_id: string;
-  failure_probability: number;
+  cutoff_date: string;
+  risk_score: number;
   risk_tier: RiskTier;
-  predicted_component: string;
-  prediction_timestamp: string;
+  top_features?: Record<string, any> | null;
   model_version: string;
+  created_at?: string | null;
 }
 
 export interface SensorAnomalyRecord {
@@ -41,17 +43,15 @@ export interface ServiceDemandForecast {
 }
 
 export interface WarrantyAnomalyRecord {
+  anomaly_id: string;
   claim_id: string;
-  dealer_id: string;
-  vehicle_id: string;
-  anomaly_score: number;
+  dealer_id?: string | null;
+  component_id?: string | null;
   claim_amount: number;
-  labor_hours: number;
-  parts_cost: number;
-  labor_cost: number;
-  is_outlier: boolean;
-  audit_recommended: boolean;
-  disclaimer: string;
+  anomaly_score: number;
+  outlier_reasons?: Record<string, any> | null;
+  model_version: string;
+  flagged_at?: string | null;
 }
 
 export interface ModelGovernanceItem {

@@ -3,7 +3,7 @@ import {
   OverviewMetricsResponse,
   PaginatedResponse,
 } from "@/types/api";
-import { VehicleDetail, VehicleSummary } from "@/types/vehicles";
+import { VehicleDetail, VehicleDiagnosticsResponse, VehicleSummary } from "@/types/vehicles";
 import {
   FailureRiskPrediction,
   ModelGovernanceResponse,
@@ -79,11 +79,19 @@ export const apiClient = {
 
   getVehicles: (
     apiKey?: string | null,
-    params?: { limit?: number; offset?: number; make?: string; state?: string }
+    params?: { limit?: number; offset?: number; status?: string }
   ) => request<PaginatedResponse<VehicleSummary>>("/api/v1/vehicles", apiKey, params),
 
   getVehicleDetail: (id: string, apiKey?: string | null) =>
     request<VehicleDetail>(`/api/v1/vehicles/${encodeURIComponent(id)}`, apiKey),
+
+  getVehicleDiagnostics: (
+    id: string,
+    apiKey?: string | null,
+    params?: { limit?: number; severity?: string }
+  ) =>
+    request<VehicleDiagnosticsResponse>(`/api/v1/vehicles/${encodeURIComponent(id)}/diagnostics`, apiKey, params),
+
 
   getFailureRisk: (
     apiKey?: string | null,

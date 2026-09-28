@@ -5,7 +5,7 @@ import { apiClient, ApiClientError } from "@/lib/api-client";
 import { VehicleDetail, VehicleSummary } from "@/types/vehicles";
 import { useAuthRole } from "./useAuthRole";
 
-export function useVehicles(filters?: { limit?: number; offset?: number; make?: string; state?: string }) {
+export function useVehicles(filters?: { limit?: number; offset?: number; status?: string }) {
   const { apiKey } = useAuthRole();
   const [vehicles, setVehicles] = useState<VehicleSummary[]>([]);
   const [total, setTotal] = useState<number>(0);
@@ -29,7 +29,7 @@ export function useVehicles(filters?: { limit?: number; offset?: number; make?: 
     } finally {
       setLoading(false);
     }
-  }, [apiKey, filters?.limit, filters?.offset, filters?.make, filters?.state]);
+  }, [apiKey, filters?.limit, filters?.offset, filters?.status]);
 
   useEffect(() => {
     fetchVehicles();
@@ -49,8 +49,16 @@ export function useVehicleDetail(vehicleId: string) {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiClient.getVehicleDetail(vehicleId, apiKey);
-      setVehicle(data);
+      const [spec, diagRes] = await Promise.all([
+        apiClient.getVehicleDetail(vehicleId, apiKey),
+        apiClient
+          .getVehicleDiagnostics(vehicleId, apiKey)
+          .catch(() => ({ total_records: 0, diagnostics: [], vehicle_id: vehicleId })),
+      ]);
+      setVehicle({
+        ...spec,
+        diagnostics: diagRes.diagnostics || [],
+      });
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
         setError(err.detail);

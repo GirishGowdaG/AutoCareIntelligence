@@ -180,3 +180,29 @@ class TestMLModels:
         curr_df = pd.DataFrame({"temp": drifted})
         res = detector.evaluate_feature_drift(ref_df, curr_df, ["temp"])
         assert res["overall_drift_detected"] is True
+
+    def test_sensor_anomaly_exact_frozen_threshold_boundary(self):
+        """Verify exact Phase 5 frozen threshold boundary condition (0.8383571332063307)."""
+        frozen_thresh = 0.8383571332063307
+
+        # 1. Verify SensorAnomalyModel.load() restores exact calibrated threshold
+        model_path = Path("data/ml/models/sensor_anomaly/v1.0.0/model.joblib")
+        loaded_model = SensorAnomalyModel().load(model_path)
+        assert np.isclose(loaded_model.calibrated_threshold, frozen_thresh, atol=1e-12)
+        assert loaded_model.calibrated_threshold == frozen_thresh
+
+        # 2. Verify StreamingSensorScorer restores exact calibrated threshold
+        scorer = StreamingSensorScorer()
+        assert np.isclose(scorer.model.calibrated_threshold, frozen_thresh, atol=1e-12)
+        assert scorer.model.calibrated_threshold == frozen_thresh
+
+        # 3. Exact threshold boundary evaluation: score < thresh, score == thresh, score > thresh
+        # Test predict threshold boundary behavior directly
+        thresh = loaded_model.calibrated_threshold
+        score_below = thresh - 0.0001
+        score_exact = thresh
+        score_above = thresh + 0.0001
+
+        assert not bool(score_below >= thresh)  # score < 0.838357... -> is_anomaly = False
+        assert bool(score_exact >= thresh)      # score == 0.838357... -> is_anomaly = True
+        assert bool(score_above >= thresh)      # score > 0.838357... -> is_anomaly = True

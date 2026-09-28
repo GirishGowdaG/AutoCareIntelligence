@@ -48,78 +48,85 @@ export default function VehicleDetailPage() {
       ) : (
         <>
           {/* Vehicle Metadata Specification Card */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
-            <div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Make</span>
-              <p className="mt-1 text-sm font-bold text-white">{vehicle.make}</p>
-            </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-8 rounded-2xl border border-slate-800 bg-slate-900/50 p-5">
             <div>
               <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Model</span>
-              <p className="mt-1 text-sm font-bold text-white">{vehicle.model_name}</p>
+              <p className="mt-1 text-sm font-bold text-white">{vehicle.model_name || "—"}</p>
             </div>
             <div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Model Year</span>
-              <p className="mt-1 text-sm font-bold text-white">{vehicle.model_year}</p>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Trim / Variant</span>
+              <p className="mt-1 text-sm font-bold text-white">{vehicle.variant || "—"}</p>
             </div>
             <div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Body Class</span>
-              <p className="mt-1 text-sm font-bold text-white">{vehicle.body_class}</p>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Manufacture Year</span>
+              <p className="mt-1 text-sm font-bold text-white">{vehicle.manufacture_year || "—"}</p>
             </div>
             <div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Engine Type</span>
-              <p className="mt-1 text-sm font-bold text-white">{vehicle.engine_type}</p>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Vehicle Class</span>
+              <p className="mt-1 text-sm font-bold text-white">{vehicle.vehicle_class || "—"}</p>
             </div>
             <div>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Operating State</span>
-              <p className="mt-1 text-sm font-bold text-white">{vehicle.state}</p>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Powertrain</span>
+              <p className="mt-1 text-sm font-bold text-white">{vehicle.powertrain_type || "—"}</p>
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Curb Weight</span>
+              <p className="mt-1 text-sm font-bold text-white">{vehicle.curb_weight_kg ? `${vehicle.curb_weight_kg} kg` : "—"}</p>
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Dealership</span>
+              <p className="mt-1 text-sm font-bold text-white truncate" title={vehicle.selling_dealer_name ?? undefined}>{vehicle.selling_dealer_name || "—"}</p>
+            </div>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Status</span>
+              <p className="mt-1 text-sm font-bold text-emerald-400">{vehicle.status || "ACTIVE"}</p>
             </div>
           </div>
 
           {/* Diagnostic Trouble Code Snapshots */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div>
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Diagnostic Snapshot Records
-                </h2>
-                <p className="text-xs text-slate-400">
-                  OBD-II Diagnostic Trouble Codes (DTC) and Malfunction Indicator Lamp (MIL) history
-                </p>
-              </div>
-              <span className="text-xs text-slate-400 font-mono">
-                {vehicle.diagnostics.length} Snapshots
-              </span>
-            </div>
+          {(() => {
+            const diagnostics = vehicle.diagnostics || [];
+            return (
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div>
+                    <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                      Diagnostic Snapshot Records
+                    </h2>
+                    <p className="text-xs text-slate-400">
+                      OBD-II Diagnostic Trouble Codes (DTC) and component severity history
+                    </p>
+                  </div>
+                  <span className="text-xs text-slate-400 font-mono">
+                    {diagnostics.length} Records
+                  </span>
+                </div>
 
-            {vehicle.diagnostics.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-500">
-                No active DTC fault codes recorded for this vehicle.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                    <tr>
-                      <th className="py-3 px-4">Timestamp</th>
-                      <th className="py-3 px-4">Snapshot ID</th>
-                      <th className="py-3 px-4">DTC Code</th>
-                      <th className="py-3 px-4">Description</th>
-                      <th className="py-3 px-4">Severity</th>
-                      <th className="py-3 px-4 text-center">MIL Lamp</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
-                    {vehicle.diagnostics.map((diag) => (
-                      <tr key={diag.snapshot_id} className="hover:bg-slate-800/40 transition">
-                        <td className="py-3 px-4 font-sans text-slate-400">
-                          {formatDate(diag.timestamp)}
-                        </td>
-                        <td className="py-3 px-4 text-slate-400 font-mono">
-                          {diag.snapshot_id}
-                        </td>
+                {diagnostics.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-slate-500">
+                    No active DTC fault codes recorded for this vehicle.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="border-b border-slate-800 bg-slate-950/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        <tr>
+                          <th className="py-3 px-4">Timestamp</th>
+                          <th className="py-3 px-4">DTC Code</th>
+                          <th className="py-3 px-4">Subsystem Component</th>
+                          <th className="py-3 px-4">Severity</th>
+                          <th className="py-3 px-4 font-mono text-slate-500">Diagnostic ID</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-mono text-slate-300">
+                        {diagnostics.map((diag) => (
+                          <tr key={diag.diagnostic_id} className="hover:bg-slate-800/40 transition">
+                            <td className="py-3 px-4 font-sans text-slate-400">
+                              {formatDate(diag.timestamp)}
+                            </td>
                         <td className="py-3 px-4">
                           {diag.dtc_code ? (
-                            <span className="font-bold text-rose-400 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-900/60">
+                            <span className="font-bold text-rose-400 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-900/60 font-mono">
                               {diag.dtc_code}
                             </span>
                           ) : (
@@ -127,7 +134,7 @@ export default function VehicleDetailPage() {
                           )}
                         </td>
                         <td className="py-3 px-4 font-sans text-slate-200">
-                          {diag.dtc_description || "—"}
+                          {diag.component || "General System"}
                         </td>
                         <td className="py-3 px-4">
                           {diag.severity ? (
@@ -136,18 +143,8 @@ export default function VehicleDetailPage() {
                             <span className="text-slate-500 font-sans">—</span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-center">
-                          {diag.mil_status ? (
-                            <span className="inline-flex items-center gap-1 rounded bg-rose-950/80 px-2 py-0.5 text-[10px] font-bold text-rose-300 border border-rose-800">
-                              <AlertCircle className="h-3 w-3 text-rose-400" />
-                              ON
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 rounded bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-slate-400 border border-slate-800">
-                              <CheckCircle className="h-3 w-3 text-emerald-400" />
-                              OFF
-                            </span>
-                          )}
+                        <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                          {diag.diagnostic_id}
                         </td>
                       </tr>
                     ))}
@@ -155,7 +152,9 @@ export default function VehicleDetailPage() {
                 </table>
               </div>
             )}
-          </div>
+              </div>
+            );
+          })()}
         </>
       )}
     </div>

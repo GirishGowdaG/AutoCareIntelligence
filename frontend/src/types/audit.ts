@@ -4,13 +4,17 @@ export type DeliveryStatus = "DELIVERED" | "MOCK_LOGGED" | "FAILED";
 export interface ActionAuditRecord {
   action_id: string;
   rule_id: string;
-  action_type: string;
   entity_type: EntityType;
   entity_id: string;
-  priority: string;
-  payload: Record<string, unknown>;
+  trigger_timestamp: string;
+  trigger_value: number;
+  threshold_applied: number;
+  action_taken: string;
+  channel_dispatched: string;
   delivery_status: DeliveryStatus;
-  executed_at: string;
+  idempotency_key: string;
+  payload?: Record<string, unknown> | null;
+  created_at?: string | null;
 }
 
 export interface TelemetryData {

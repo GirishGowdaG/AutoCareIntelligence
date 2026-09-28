@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   ArrowRight,
   ExternalLink,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import { useOverviewMetrics, useFailureRisk, useModelGovernance } from "@/hooks/usePredictions";
@@ -18,6 +19,7 @@ import { StatCard } from "@/components/common/StatCard";
 import { ErrorBanner, SkeletonTable } from "@/components/common/EmptyState";
 import { RiskTierBarChart } from "@/components/charts/RiskTierBarChart";
 import { ModelGovernanceDrawer } from "@/components/governance/ModelGovernanceDrawer";
+import { formatDate } from "@/lib/utils";
 
 export default function OverviewPage() {
   const { metrics, loading: metricsLoading, error: metricsError, refetch: refetchMetrics } = useOverviewMetrics();
@@ -91,28 +93,28 @@ export default function OverviewPage() {
         />
         <StatCard
           title="Active Anomalies"
-          value={metrics ? metrics.active_sensor_anomalies : metricsLoading ? "..." : "—"}
+          value={metrics ? metrics.sensor_anomalies_detected : metricsLoading ? "..." : "—"}
           subtitle="Area 2 sensor faults"
           icon={Activity}
           variant="warning"
         />
         <StatCard
-          title="Demand Surges"
-          value={metrics ? metrics.surge_demand_regions : metricsLoading ? "..." : "—"}
-          subtitle="Area 3 capacity alerts"
-          icon={TrendingUp}
+          title="Last Dispatch"
+          value={metrics ? (metrics.last_action_timestamp ? formatDate(metrics.last_action_timestamp) : "—") : metricsLoading ? "..." : "—"}
+          subtitle="Area 6 automated dispatch"
+          icon={Clock}
           variant="info"
         />
         <StatCard
           title="Flagged Claims"
-          value={metrics ? metrics.flagged_warranty_claims : metricsLoading ? "..." : "—"}
+          value={metrics ? metrics.warranty_outliers_flagged : metricsLoading ? "..." : "—"}
           subtitle="Area 4 audit outliers"
           icon={FileCheck2}
           variant="critical"
         />
         <StatCard
           title="Action Logs"
-          value={metrics ? metrics.recent_actions_count : metricsLoading ? "..." : "—"}
+          value={metrics ? metrics.actions_logged_total : metricsLoading ? "..." : "—"}
           subtitle="Automated dispatches"
           icon={Zap}
           variant="success"
@@ -129,7 +131,7 @@ export default function OverviewPage() {
                 Fleet Failure Risk Distribution
               </h2>
               <p className="text-xs text-slate-400">
-                Area 1 gradient boosting risk tier breakdown across total active fleet
+                100 predictions across 50 active fleet assets
               </p>
             </div>
             <Link

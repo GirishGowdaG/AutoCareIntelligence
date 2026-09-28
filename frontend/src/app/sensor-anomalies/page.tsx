@@ -204,10 +204,10 @@ export default function SensorAnomaliesPage() {
                     <td className="py-3 px-4 text-slate-400 text-xs">
                       {frozenThreshold !== null ? (
                         <span>
-                          {r.anomaly_score > frozenThreshold ? (
-                            <span className="text-rose-400 font-semibold">&gt; {frozenThreshold.toFixed(6)}</span>
+                          {r.anomaly_score >= frozenThreshold ? (
+                            <span className="text-rose-400 font-semibold">&ge; {frozenThreshold.toFixed(6)}</span>
                           ) : (
-                            <span className="text-emerald-400 font-semibold">&le; {frozenThreshold.toFixed(6)}</span>
+                            <span className="text-emerald-400 font-semibold">&lt; {frozenThreshold.toFixed(6)}</span>
                           )}
                         </span>
                       ) : (
