@@ -163,3 +163,8 @@ The project tracks exactly **18 Mandatory Deliverables** and **1 Recommended Del
 ### Architectural & Governance References
 - [Enterprise Data Dictionary](docs/data_dictionary.md)
 - [Architecture & Technology Decisions](docs/architecture/technology_decisions.md)
+- [System Architecture & Visual C4 Specifications](docs/architecture/system_architecture.md)
+- [Star Schema & Dimensional ERD Specification](docs/architecture/star_schema_erd.md)
+- [Cloud Deployment Architecture & TCO Cost Model](docs/deployment/cloud_architecture_and_cost.md)
+- [Capstone Presentation Deck Outline](docs/presentation/capstone_presentation.md)
+- [Capstone 5-Minute Demo Walkthrough Script](docs/demo/capstone_demo_walkthrough.md)
