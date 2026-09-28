@@ -69,6 +69,9 @@ services:
       AUTOCARE_DB_USER: autocare_backend
       AUTOCARE_DB_PASSWORD: "${AUTOCARE_BACKEND_DB_PASSWORD:?Error: AUTOCARE_BACKEND_DB_PASSWORD required}"
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      AUTOCARE_ADMIN_KEY: "${AUTOCARE_ADMIN_KEY:?Error: AUTOCARE_ADMIN_KEY required}"
+      AUTOCARE_DEALER_KEY: "${AUTOCARE_DEALER_KEY:?Error: AUTOCARE_DEALER_KEY required}"
+      AUTOCARE_ANALYST_KEY: "${AUTOCARE_ANALYST_KEY:?Error: AUTOCARE_ANALYST_KEY required}"
     ports:
       - "8000:8000"
     depends_on:
@@ -98,6 +101,14 @@ services:
       AUTOCARE_DB_USER: autocare_worker
       AUTOCARE_DB_PASSWORD: "${AUTOCARE_WORKER_DB_PASSWORD:?Error: AUTOCARE_WORKER_DB_PASSWORD required}"
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    command:
+      - sh
+      - -c
+      - |
+          while true; do
+            python -c "from automation.worker import AutomationWorker; worker = AutomationWorker(); worker.run_kafka_consumer_loop()"
+            sleep 1
+          done
     depends_on:
       postgres:
         condition: service_healthy
@@ -132,7 +143,7 @@ services:
     networks:
       - autocare-net
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
