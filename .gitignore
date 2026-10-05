@@ -30,6 +30,7 @@ ENV/
 *.duckdb.*
 data/warehouse/
 data/pgdata/
+data/scale_100k/
 
 # Node / Frontend
 node_modules/
